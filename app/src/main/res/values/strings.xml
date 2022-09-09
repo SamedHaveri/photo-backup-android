@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">PhotoBackup</string>
+<!--    shared preferences keys-->
+    <string name="prefs">prefs</string>
+    <string name="token_key">token</string>
+    <string name="username_key">username</string>
+    <string name="id_key">id</string>
+    <string name="token_expiration_key">tokenExpiration</string>
+    
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="username_text">Username</string>
+    <string name="password_text">Password</string>
+    <string name="login_button">Login</string>
+</resources>
