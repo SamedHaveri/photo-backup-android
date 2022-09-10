@@ -2,24 +2,45 @@ package com.example.photobackup
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.photobackup.network.ApiClient
 import com.example.photobackup.network.AuthenticationResponse
-import com.example.photobackup.network.bodyModel.AuthenticationBody
+import com.example.photobackup.network.requestDTO.AuthenticationRequestDTO
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.time.LocalDateTime
 
 class LoginActivity : AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        val sharedPref = this@LoginActivity.getSharedPreferences(
+            getString(R.string.prefs), Context.MODE_PRIVATE
+        ) ?: return
+        val token = sharedPref.getString(getString(R.string.token_key), null)
+        if (token != null) {
+            val expirationDate =
+                sharedPref.getString(getString(R.string.token_expiration_key), null)
+            val expDate = LocalDateTime.parse(expirationDate)
+            val nowDate = LocalDateTime.now();
+            if (expDate.isAfter(nowDate)) {
+                val intent =
+                    Intent(this@LoginActivity, MainActivity::class.java).apply {}
+                startActivity(intent)
+                finish()
+            }
+        }
 
         val loginButton = findViewById<Button>(R.id.loginButton)
         val usernameText = findViewById<EditText>(R.id.etUsername)
@@ -36,11 +57,7 @@ class LoginActivity : AppCompatActivity() {
                 else -> {
                     val username = usernameText.text.toString().trim { it <= ' ' }
                     val password = passwordText.text.toString().trim { it <= ' ' }
-
-                    Log.d("CUSTOM_INFO", "username: " + username)
-                    Log.d("CUSTOM_INFO", "password: " + password)
-
-                    val authData = AuthenticationBody(username, password)
+                    val authData = AuthenticationRequestDTO(username, password)
 
                     val client = ApiClient.apiService.authenticate(authData)
 
@@ -50,19 +67,11 @@ class LoginActivity : AppCompatActivity() {
                             response: Response<AuthenticationResponse>
                         ) {
                             Log.d("SUCCESS", "SUCCESS ACCESSING DB")
-                            if (response.code() != 200) {
-                                Toast.makeText(
-                                    this@LoginActivity,
-                                    "Wrong Username or Password", Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                val sharedPref = this@LoginActivity.getSharedPreferences(
-                                    getString(R.string.prefs), Context.MODE_PRIVATE
-                                ) ?: return
+                            if (response.code() == 200) {
                                 with(sharedPref.edit()) {
                                     putString(
                                         getString(R.string.token_key),
-                                        response.body()!!.token
+                                        "Bearer " + response.body()!!.token
                                     )
                                     putString(
                                         getString(R.string.username_key),
@@ -71,15 +80,35 @@ class LoginActivity : AppCompatActivity() {
                                     putInt(getString(R.string.id_key), response.body()!!.id)
                                     putString(
                                         getString(R.string.token_expiration_key),
-                                        response.body()!!.tokenExpiration.toString()
+                                        response.body()!!.tokenExpiration
                                     )
                                     apply()
                                 }
                                 val intent =
                                     Intent(this@LoginActivity, MainActivity::class.java).apply {}
                                 startActivity(intent)
+                                finish()
+                            }
+                            else if (response.code() == 403) {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Wrong Username or Password", Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            else if (response.code() == 500){
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Server Error", Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            else {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Unknown Error", Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
+
                         override fun onFailure(call: Call<AuthenticationResponse>, t: Throwable) {
                             Toast.makeText(
                                 this@LoginActivity,

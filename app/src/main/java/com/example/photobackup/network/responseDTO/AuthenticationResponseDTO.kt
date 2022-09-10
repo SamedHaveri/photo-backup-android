@@ -12,5 +12,5 @@ data class AuthenticationResponse(
     @Json(name = "username")
     val username: String,
     @Json(name = "tokenExpiration")
-    val tokenExpiration: Date,
+    val tokenExpiration: String,
 )
