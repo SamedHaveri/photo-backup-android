@@ -1,4 +1,4 @@
-package com.example.photobackup.network.responseDTO
+package com.example.photobackup.models
 
 data class ImageData(
     val id: Int,
