@@ -11,12 +11,12 @@ import retrofit2.http.*
 interface ApiService {
 
     @POST("authenticate")
-    fun authenticate(@Body auth: AuthRequest): Response<AuthResponse>
+    suspend fun authenticate(@Body auth: AuthRequest): Response<AuthResponse>
 
     @GET("images")
-    fun getImages(): Call<List<ImageData>>
+    suspend fun getImages(): Call<List<ImageData>>
 
     @GET("images/download/id{id}")
-    fun downloadImage(@Path("id") id: Int, @Header("Authorization") token: String): Response<ResponseBody>
+    suspend fun downloadImage(@Path("id") id: Int, @Header("Authorization") token: String): Response<ResponseBody>
 
 }
