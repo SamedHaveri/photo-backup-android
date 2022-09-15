@@ -74,7 +74,7 @@ class LoginActivity : AppCompatActivity() {
                                 finish()
                 }
                 Status.LOADING ->{
-                    Toast.makeText(this@LoginActivity, "Loading", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this@LoginActivity, "Loading", Toast.LENGTH_SHORT).show()
                 }
                 Status.ERROR ->{
                     Toast.makeText(this@LoginActivity, it.message, Toast.LENGTH_SHORT).show()
