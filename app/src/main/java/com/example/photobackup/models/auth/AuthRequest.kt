@@ -1,4 +1,4 @@
-package com.example.photobackup.models
+package com.example.photobackup.models.auth
 
 import com.google.gson.annotations.SerializedName
 

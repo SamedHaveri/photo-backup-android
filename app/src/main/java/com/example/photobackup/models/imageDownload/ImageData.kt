@@ -1,4 +1,4 @@
-package com.example.photobackup.models
+package com.example.photobackup.models.imageDownload
 
 data class ImageData(
     val id: Int,

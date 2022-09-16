@@ -1,11 +1,11 @@
-package com.example.photobackup.ui
+package com.example.photobackup.ui.login
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.photobackup.models.AuthRequest
-import com.example.photobackup.models.AuthResponse
+import com.example.photobackup.models.auth.AuthRequest
+import com.example.photobackup.models.auth.AuthResponse
 import com.example.photobackup.other.Resource
 import com.example.photobackup.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

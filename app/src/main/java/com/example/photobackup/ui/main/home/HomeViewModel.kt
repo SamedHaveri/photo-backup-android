@@ -1,12 +1,9 @@
-package com.example.photobackup.ui.home
+package com.example.photobackup.ui.main.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.photobackup.models.ImageData
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.photobackup.models.imageDownload.ImageData
 
 class HomeViewModel : ViewModel() {
 

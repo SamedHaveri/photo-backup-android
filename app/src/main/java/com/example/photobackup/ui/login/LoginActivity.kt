@@ -1,4 +1,4 @@
-package com.example.photobackup.ui
+package com.example.photobackup.ui.login
 
 import android.content.Context
 import android.content.Intent
@@ -13,10 +13,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.photobackup.R
-import com.example.photobackup.models.AuthRequest
 import com.example.photobackup.other.Status
+import com.example.photobackup.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 
 @AndroidEntryPoint

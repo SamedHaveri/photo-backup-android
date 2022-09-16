@@ -1,8 +1,8 @@
 package com.example.photobackup.api
 
-import com.example.photobackup.models.AuthRequest
-import com.example.photobackup.models.AuthResponse
-import com.example.photobackup.models.ImageData
+import com.example.photobackup.models.auth.AuthRequest
+import com.example.photobackup.models.auth.AuthResponse
+import com.example.photobackup.models.imageDownload.ImageData
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response

@@ -1,4 +1,4 @@
-package com.example.photobackup.ui.notifications
+package com.example.photobackup.ui.main.notifications
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.photobackup.R
 import com.example.photobackup.databinding.FragmentNotificationsBinding
 
 class NotificationsFragment : Fragment() {
