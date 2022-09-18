@@ -8,4 +8,5 @@ class MainRepository @Inject constructor(
     private val apiHelper: ApiHelper
 ) {
     suspend fun authenticate(authRequest: AuthRequest) = apiHelper.authenticate(authRequest)
+    suspend fun getImages(authToken:String) = apiHelper.getImages(authToken)
 }

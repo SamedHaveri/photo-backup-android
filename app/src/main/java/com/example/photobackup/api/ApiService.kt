@@ -14,7 +14,7 @@ interface ApiService {
     suspend fun authenticate(@Body auth: AuthRequest): Response<AuthResponse>
 
     @GET("images")
-    suspend fun getImages(): Call<List<ImageData>>
+    suspend fun getImages(@Header("Authorization") authToken:String): Response<List<ImageData>>
 
     @GET("images/download/id{id}")
     suspend fun downloadImage(@Path("id") id: Int, @Header("Authorization") token: String): Response<ResponseBody>
