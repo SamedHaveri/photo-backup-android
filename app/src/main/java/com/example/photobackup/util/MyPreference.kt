@@ -23,16 +23,16 @@ class MyPreference @Inject constructor(@ApplicationContext context : Context){
         prefs.edit()
             .putString(R.string.token_key.toString(), token)
             .putString(R.string.username_key.toString(), username)
-            .putString(R.string.id_key.toString(), id)
+            .putInt(R.string.id_key.toString(), id.toInt())
             .putString(R.string.token_expiration_key.toString(), expDate).apply()
     }
 
     fun getStoredAuthDetails(): AuthDetails {
         val token = prefs.getString(R.string.token_key.toString(), "")
         val username = prefs.getString(R.string.username_key.toString(), "")
-        val id = prefs.getString(R.string.id_key.toString(), "")
+        val id = prefs.getInt(R.string.id_key.toString(), 0)
         val expDate = prefs.getString(R.string.token_expiration_key.toString(), "")
-        return AuthDetails(token, id!!.toInt(), username.toString(), expDate.toString())
+        return AuthDetails(token, id, username, expDate)
     }
 
     fun getStoredString(key:String) {

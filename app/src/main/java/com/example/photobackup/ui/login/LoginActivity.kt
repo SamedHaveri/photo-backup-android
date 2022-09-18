@@ -31,13 +31,16 @@ class LoginActivity : AppCompatActivity() {
         val passwordText = findViewById<EditText>(R.id.etPassword)
 
         val authDetails = loginViewModel.authDetails
-        Log.d("TOKEN_LOGINac", authDetails.token)
-        val expDate = LocalDateTime.parse(authDetails.tokenExpiration)
-        val nowDate = LocalDateTime.now();
-        if (expDate.isAfter(nowDate)) {
-            val intent =
-                Intent(this@LoginActivity, MainActivity::class.java).apply {}
-            startActivity(intent)
+        try {
+            val expDate = LocalDateTime.parse(authDetails.tokenExpiration)
+            val nowDate = LocalDateTime.now();
+            if (expDate.isAfter(nowDate)) {
+                val intent =
+                    Intent(this@LoginActivity, MainActivity::class.java).apply {}
+                startActivity(intent)
+            }
+        }catch (_:java.lang.Exception){
+
         }
 
         loginViewModel.res.observe(this, Observer {

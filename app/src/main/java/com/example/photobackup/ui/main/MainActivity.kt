@@ -30,8 +30,6 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel: MainViewModel by viewModels()
         val authDetails = mainViewModel.authDetails
 
-        Log.d("TOKEN-MAINac", authDetails.token)
-
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
