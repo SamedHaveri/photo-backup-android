@@ -34,12 +34,12 @@ class LoginActivity : AppCompatActivity() {
         try {
             val expDate = LocalDateTime.parse(authDetails.tokenExpiration)
             val nowDate = LocalDateTime.now();
-            if (expDate.isAfter(nowDate)) {
+            if (expDate.isAfter(nowDate) && authDetails.token != "") {
                 val intent =
                     Intent(this@LoginActivity, MainActivity::class.java).apply {}
                 startActivity(intent)
             }
-        }catch (_:java.lang.Exception){
+        }catch (_:java.lang.RuntimeException){
 
         }
 

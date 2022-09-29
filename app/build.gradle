@@ -65,6 +65,9 @@ dependencies {
       //Glide RecyclerView
     implementation 'com.github.bumptech.glide:recyclerview-integration:4.11.0'
 
+    //imageView
+    implementation 'com.github.stfalcon-studio:StfalconImageViewer:v1.0.1'
+
     //Dependecy bug fix
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
 
