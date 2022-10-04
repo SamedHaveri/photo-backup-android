@@ -1,20 +1,15 @@
 package com.example.photobackup.ui.main
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.photobackup.R
 import com.example.photobackup.databinding.ActivityMainBinding
+import com.example.photobackup.ui.main.photos.PhotosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,8 +22,8 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val mainViewModel: MainViewModel by viewModels()
-        val authDetails = mainViewModel.authDetails
+        val photosViewModel: PhotosViewModel by viewModels()
+        val authDetails = photosViewModel.authDetails
 
         val navView: BottomNavigationView = binding.navView
 

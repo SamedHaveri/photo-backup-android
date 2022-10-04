@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -8,8 +8,58 @@
         tools:context=".ui.main.photos.PhotosFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+            android:id="@+id/demo_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="@dimen/demo_list_margin"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbars="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/demo_item_photo"
+            tools:spanCount="3" />
+
+    <View
+            android:id="@+id/demo_full_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:visibility="invisible" />
+
+    <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/demo_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/demo_pager_toolbar"
+            style="@style/App.Toolbar.Transparent"
+            android:visibility="invisible" />
+
+    <TextView
+            android:id="@+id/demo_pager_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:shadowColor="#000000"
+            android:shadowRadius="4"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:visibility="invisible" />
+
+<!--    <com.alexvasilkov.gestures.commons.circle.CircleGestureImageView-->
+<!--            android:id="@+id/demo_full_image"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:visibility="invisible"-->
+<!--            app:gest_doubleTapZoom="3"-->
+<!--            app:gest_maxZoom="10" />-->
+
+<!--    <androidx.appcompat.widget.Toolbar-->
+<!--            android:id="@+id/demo_full_image_toolbar"-->
+<!--            style="@style/App.Toolbar.Transparent"-->
+<!--            android:visibility="invisible" />-->
+
+</RelativeLayout>

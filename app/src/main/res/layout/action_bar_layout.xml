@@ -15,3 +15,44 @@
             android:text="@string/title_main"/>
 
 </LinearLayout>
+
+<!--
+        <?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context=".ui.main.photos.PhotosFragment"
+android:id="@+id/demo_coordinator"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/demo_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="164dp"
+        android:background="?colorSurface"
+        tools:ignore="UnusedAttribute">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:collapsedTitleGravity="start"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleEnabled="false">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                style="@style/App.Toolbar.Transparent"
+                app:layout_collapseMode="pin" />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:id="@+id/mainTitle"
+                android:fontFamily="monospace"
+                android:text="@string/title_main"/>
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+</com.google.android.material.appbar.AppBarLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>-->

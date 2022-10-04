@@ -66,7 +66,8 @@ dependencies {
     implementation 'com.github.bumptech.glide:recyclerview-integration:4.11.0'
 
     //imageView
-    implementation 'com.github.stfalcon-studio:StfalconImageViewer:v1.0.1'
+    implementation 'com.alexvasilkov:gesture-views:2.8.3'
+    implementation 'com.alexvasilkov:android-commons:2.0.2'
 
     //Dependecy bug fix
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
