@@ -1,14 +1,17 @@
 package com.example.photobackup.ui.main.photos
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,22 +23,18 @@ import com.alexvasilkov.gestures.transition.GestureTransitions
 import com.alexvasilkov.gestures.transition.ViewsTransitionAnimator
 import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
-import com.example.photobackup.databinding.FragmentPhotosBinding
 import com.example.photobackup.models.imageDownload.ImageData
 import com.example.photobackup.other.Status
+import com.example.photobackup.ui.login.LoginActivity
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
 import dagger.hilt.android.AndroidEntryPoint
 
+
 @AndroidEntryPoint
-class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
+class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
 
-    private var _binding: FragmentPhotosBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
     private val NO_POSITION = -1
 
     private var views: ViewHolder? = null
@@ -46,21 +45,37 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
     private var pagerListener: OnPageChangeCallback? = null
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View? {
-//        _binding = FragmentPhotosBinding.inflate(inflater, container, false)
-        val root = inflater.inflate(R.layout.fragment_photos, container, false)
-        this.views = ViewHolder(root)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.fragment_photos)
+        this.views = ViewHolder(this)
         val photosViewModel: PhotosViewModel by viewModels()
         val authDetails = photosViewModel.authDetails
 
-        //        setAppBarStateListAnimator(views.appBar)
-//        initDecorMargins()
+//        setAppBarStateListAnimator(views.appBar)
+        initDecorMargins()
 
-        val imagesData = photosViewModel.imageData.observe(viewLifecycleOwner, Observer {
+//        var bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+//        bottomNavigationView.selectedItemId = R.id.navigation_home
+//        @Suppress("DEPRECATION")
+//        bottomNavigationView.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.navigation_dashboard -> {
+////                    startActivity(Intent(applicationContext, DashBoard::class.java))
+//                    overridePendingTransition(0, 0)
+//                    return@OnNavigationItemSelectedListener true
+//                }
+//                R.id.home -> return@OnNavigationItemSelectedListener true
+//                R.id.navigation_notifications -> {
+////                    startActivity(Intent(applicationContext, About::class.java))
+//                    overridePendingTransition(0, 0)
+//                    return@OnNavigationItemSelectedListener true
+//                }
+//            }
+//            false
+//        })
+
+        val imagesData = photosViewModel.imageData.observe(this, Observer {
             when (it.status) {
                 Status.SUCCESS -> {
                     initGrid(it.data!!, authDetails.token!!)
@@ -76,13 +91,12 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
 //                    Toast.makeText(this@LoginActivity, "Loading", Toast.LENGTH_SHORT).show()
                 }
                 Status.ERROR -> {
-                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
                     //get photo thumbnail from cache
                 }
             }
         })
-
-        return root
+        //todo save position
     }
 
 //    override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,37 +115,36 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
 //        })
 //    }
 
-    private fun onBackPressed() {
+    override fun onBackPressed() {
         if (!listAnimator!!.isLeaving) {
             listAnimator!!.exit(true) // Exiting from full pager
         } else if (!imageAnimator!!.isLeaving) {
             imageAnimator!!.exit(true) // Exiting from full top image
         } else {
             @Suppress("DEPRECATION")
-            activity?.onBackPressed()
+            super.onBackPressed()
         }
     }
 
     private fun initDecorMargins() {
-//        DecorUtils.size(views!!.appBar, Gravity.TOP)
-//        DecorUtils.padding(views.toolbar, Gravity.TOP)
-//        DecorUtils.padding(views!!.pagerToolbar, Gravity.TOP)
-//        DecorUtils.padding(views!!.grid, Gravity.BOTTOM)
-//        DecorUtils.margin(views!!.pagerTitle, Gravity.BOTTOM)
+        DecorUtils.size(views!!.appBar, Gravity.TOP)
+//        DecorUtils.padding(views!!.toolbar, Gravity.TOP)
+        DecorUtils.padding(views!!.pagerToolbar, Gravity.TOP)
+        DecorUtils.padding(views!!.grid, Gravity.BOTTOM)
+        DecorUtils.margin(views!!.pagerTitle, Gravity.BOTTOM)
     }
 
     private fun initGrid(imagesData: List<ImageData>, token: String) {
         // Setting up images grid
         val cols = resources.getInteger(R.integer.images_grid_columns)
-        views!!.grid.layoutManager = GridLayoutManager(requireContext(), cols)
-        gridAdapter = RecyclerAdapter(this, requireContext(), imagesData, token)
+        views!!.grid.layoutManager = GridLayoutManager(this, cols)
+        gridAdapter = RecyclerAdapter(this, this, imagesData, token)
         views!!.grid.adapter = gridAdapter
     }
 
     private fun initPager(imagesData: List<ImageData>, token: String) {
         // Setting up pager adapter
-
-        pagerAdapter = PagerAdapter(requireContext(), imagesData, token)
+        pagerAdapter = PagerAdapter(this, imagesData, token)
         // Enabling immersive mode by clicking on full screen image
         pagerAdapter!!.setImageClickListener(object : PagerAdapter.ImageClickListener {
             override fun onFullImageClick() {
@@ -169,10 +182,10 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
         if (imageData == null) {
             views!!.pagerTitle.text = null
         } else {
-            val title = SpannableBuilder(requireContext())
-            title.append(imageData.name)
-                .createStyle().setColorResId(R.color.demo_photo_subtitle).apply()
-            views!!.pagerTitle.text = title.build()
+            val title = SpannableBuilder(this)
+//            title.append(imageData.name)
+//                .createStyle().setColorResId(R.color.demo_photo_subtitle).apply()
+//            views!!.pagerTitle.text = title.build()
         }
     }
 
@@ -213,11 +226,6 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     override fun onPhotoClick(position: Int) {
         pagerAdapter!!.setActivated(true)
         listAnimator!!.enter(position, true)
@@ -230,7 +238,7 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
     @Suppress("DEPRECATED_IDENTITY_EQUALS")
     private fun isSystemUiShown(): Boolean {
         @Suppress("DEPRECATION")
-        return (requireActivity().window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_FULLSCREEN) === 0
+        return (window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_FULLSCREEN) === 0
     }
 
     /**
@@ -242,33 +250,26 @@ class PhotosFragment : Fragment(), RecyclerAdapter.OnPhotoListener {
         val flags = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_IMMERSIVE)
-        requireActivity().window.decorView.systemUiVisibility = if (show) 0 else flags
+        window.decorView.systemUiVisibility = if (show) 0 else flags
     }
 
-    private class ViewHolder(activity: View) {
+    private class ViewHolder(activity: Activity) {
 //        val toolbar: Toolbar
-//        val appBar: View
-
-        //        val appBarImage: ImageView
+        val appBar: View
         val grid: RecyclerView
         val fullBackground: View
         val pager: ViewPager2
         val pagerTitle: TextView
         val pagerToolbar: Toolbar
-//        val fullImage: GestureImageView
-//        val fullImageToolbar: Toolbar
 
         init {
 //            toolbar = activity.findViewById(R.id.toolbar)
-//            appBar = activity.findViewById(R.id.demo_app_bar)
-//            appBarImage = activity.findViewById(R.id.demo_app_bar_image)
+            appBar = activity.findViewById(R.id.demo_app_bar)
             grid = activity.findViewById(R.id.demo_grid)
             fullBackground = activity.findViewById(R.id.demo_full_background)
             pager = activity.findViewById(R.id.demo_pager)
             pagerTitle = activity.findViewById(R.id.demo_pager_title)
             pagerToolbar = activity.findViewById(R.id.demo_pager_toolbar)
-//            fullImage = activity.findViewById(R.id.demo_full_image)
-//            fullImageToolbar = activity.findViewById(R.id.demo_full_image_toolbar)
         }
     }
 

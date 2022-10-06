@@ -8,12 +8,11 @@
 
     <FrameLayout
             android:layout_width="fill_parent"
-            android:layout_height="200dp"
+            android:layout_height="170dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:id="@+id/frameLayout">
-
         <TextView
                 android:text="PhotoBackup"
                 android:textSize="70px"
@@ -56,7 +55,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginBottom="136dp" />
+            android:layout_marginBottom="240dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

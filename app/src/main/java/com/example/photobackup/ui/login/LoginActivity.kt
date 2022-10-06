@@ -4,17 +4,17 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.photobackup.R
 import com.example.photobackup.other.Status
-import com.example.photobackup.ui.main.MainActivity
+import com.example.photobackup.ui.main.photos.PhotosFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
 
@@ -36,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
             val nowDate = LocalDateTime.now();
             if (expDate.isAfter(nowDate) && authDetails.token != "") {
                 val intent =
-                    Intent(this@LoginActivity, MainActivity::class.java).apply {}
+                    Intent(this@LoginActivity, PhotosFragment::class.java).apply {}
                 startActivity(intent)
             }
         }catch (_:java.lang.RuntimeException){
@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
             when (it.status) {
                 Status.SUCCESS -> {
                     val intent =
-                        Intent(this@LoginActivity, MainActivity::class.java)
+                        Intent(this@LoginActivity, PhotosFragment::class.java)
                     startActivity(intent)
                 }
                 Status.LOADING -> {
