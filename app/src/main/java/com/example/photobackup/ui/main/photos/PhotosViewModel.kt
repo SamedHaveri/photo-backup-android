@@ -49,7 +49,7 @@ class PhotosViewModel @Inject constructor(
                 } else if (it.code() == 403){
                     _imagesData.postValue(Resource.error("Token Expired", null))
                 }else {
-                    _imagesData.postValue(Resource.error("API Error", null))
+                    _imagesData.postValue(Resource.error(it.code().toString(), null))
                 }
             }
         }catch (ex: ConnectException){

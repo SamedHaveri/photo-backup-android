@@ -160,6 +160,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             }
         }
         views!!.pager.adapter = pagerAdapter
+        views!!.pager.offscreenPageLimit = 10
         views!!.pager.registerOnPageChangeCallback(pagerListener as OnPageChangeCallback)
         views!!.pager.setPageTransformer(DepthPageTransformer())
 

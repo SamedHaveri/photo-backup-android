@@ -69,6 +69,9 @@ dependencies {
     implementation 'com.alexvasilkov:gesture-views:2.8.3'
     implementation 'com.alexvasilkov:android-commons:2.0.2'
 
+    //Subscaling imageview (performance)
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
+
     //Dependecy bug fix
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
 

@@ -13,10 +13,10 @@ interface ApiService {
     @POST("authenticate")
     suspend fun authenticate(@Body auth: AuthRequest): Response<AuthResponse>
 
-    @GET("images")
+    @GET("media")
     suspend fun getImages(@Header("Authorization") authToken:String): Response<List<ImageData>>
 
-    @GET("images/download/id{id}")
+    @GET("media/download/id{id}")
     suspend fun downloadImage(@Path("id") id: Int, @Header("Authorization") token: String): Response<ResponseBody>
 
 }

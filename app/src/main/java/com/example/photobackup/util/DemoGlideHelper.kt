@@ -35,7 +35,7 @@ class DemoGlideHelper {
         }
 
     private val TRANSITION_FACTORY =
-        TransitionFactory { dataSource: DataSource, isFirstResource: Boolean ->
+        TransitionFactory { dataSource: DataSource, _: Boolean ->
             if (dataSource == DataSource.REMOTE) TRANSITION else NoTransition.get() }
 
     fun loadThumb(imageData: ImageData, image:ImageView, token:String){
@@ -45,20 +45,24 @@ class DemoGlideHelper {
                 .build()
         )
         val mediumUrl = GlideUrl(
-            Constants.BASE_GET_IMAGES_URL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_MID_THUMBNAIL+imageData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
         val options = RequestOptions()
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+            .dontTransform()
+
+        val thumbOptions = RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
             .dontTransform()
 
         val thumbRequest: RequestBuilder<Drawable> = Glide.with(image)
             .load(thumbUrl)
-            .apply(options)
+            .apply(thumbOptions)
             .transition(DrawableTransitionOptions.with(TRANSITION_FACTORY))
-        //todo make a medium quality request to api when api implementation is made
         Glide.with(image)
             .load(mediumUrl)
             .apply(options)
@@ -67,30 +71,33 @@ class DemoGlideHelper {
     }
 
     fun loadFull(imageData: ImageData, image: ImageView, token: String, listener: LoadingListener){
-        //todo it should get medium first then the full image
         val thumbUrl = GlideUrl(
-            Constants.BASE_GET_THUMBNAIL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_MID_THUMBNAIL+imageData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
-        val mediumUrl = GlideUrl(
+        val fullUrl = GlideUrl(
             Constants.BASE_GET_IMAGES_URL+imageData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
         val options = RequestOptions()
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .override(2200, 2200)
+            .dontTransform()
+
+        val thumbOptions = RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
             .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
             .dontTransform()
 
         val thumbRequest: RequestBuilder<Drawable> = Glide.with(image)
             .load(thumbUrl)
-            .apply(options)
+            .apply(thumbOptions)
             .transition(DrawableTransitionOptions.with(TRANSITION_FACTORY))
 
-        //todo make a medium quality request to api when api implementation is made
         Glide.with(image)
-            .load(mediumUrl)
+            .load(fullUrl)
             .apply(RequestOptions().apply(options).placeholder(image.drawable))
             .thumbnail(thumbRequest)
             .listener(RequestListenerWrapper(listener))
