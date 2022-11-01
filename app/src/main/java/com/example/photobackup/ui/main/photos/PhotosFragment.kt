@@ -1,15 +1,12 @@
 package com.example.photobackup.ui.main.photos
 
 import android.app.Activity
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -25,7 +22,6 @@ import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
 import com.example.photobackup.models.imageDownload.ImageData
 import com.example.photobackup.other.Status
-import com.example.photobackup.ui.login.LoginActivity
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
@@ -198,7 +194,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         }
         val pagerTracker: SimpleTracker = object : SimpleTracker() {
             override fun getViewAt(pos: Int): View? {
-                return pagerAdapter!!.getImage(pos)
+                return pagerAdapter!!.getMedia(pos)
             }
         }
         listAnimator = GestureTransitions

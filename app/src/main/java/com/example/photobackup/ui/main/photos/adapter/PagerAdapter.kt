@@ -9,24 +9,33 @@ import com.alexvasilkov.gestures.GestureController
 import com.alexvasilkov.gestures.GestureController.OnStateChangeListener
 import com.alexvasilkov.gestures.Settings
 import com.alexvasilkov.gestures.State
+import com.alexvasilkov.gestures.views.GestureFrameLayout
 import com.alexvasilkov.gestures.views.GestureImageView
 import com.example.photobackup.R
 import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.other.Constants
 import com.example.photobackup.util.DemoGlideHelper
 import com.example.photobackup.util.GestureViewSettings
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.HttpDataSource
+
 
 class PagerAdapter(
     private val context: Context,
     private val imagesData: List<ImageData>,
     private val token: String,
-) : RecyclerView.Adapter<PagerAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var recyclerView: RecyclerView? = null
     private val PROGRESS_DELAY = 200L
     private var activated: Boolean = false
-    //todo fix the onclick function call
     private lateinit var listener: ImageClickListener
-    fun setImageClickListener(clickListener:ImageClickListener) {
+    fun setImageClickListener(clickListener: ImageClickListener) {
         listener = clickListener
     }
 
@@ -37,63 +46,143 @@ class PagerAdapter(
         }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    companion object {
+        const val IMAGE_VIEW = 1
+        const val VIDEO_VIEW = 2
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (imagesData[position].mediaType) {
+            Constants.VIDEO_TYPE -> VIDEO_VIEW
+            Constants.IMAGE_TYPE -> IMAGE_VIEW
+            else -> -1
+        }
+    }
+
+    inner class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view),
+        View.OnClickListener {
         internal var image: GestureImageView
         internal var progress: View
+
         init {
             image = view.findViewById(R.id.photo_full_image)
             image.setOnClickListener(this)
             progress = view.findViewById(R.id.photo_full_progress)
         }
+
         override fun onClick(v: View?) {
             val position = bindingAdapterPosition
-//            if (position != RecyclerView.NO_POSITION)
-//                listener.onFullImageClick()
+            if (position != RecyclerView.NO_POSITION)
+                listener.onFullImageClick()
+        }
+
+        fun bind(position: Int) {
+            GestureViewSettings().applyDefault(image)
+            progress.animate().setDuration(150L)
+                .setStartDelay(PROGRESS_DELAY)
+                .alpha(1f)
+            // Loading image
+
+            // Loading image
+            DemoGlideHelper().loadFull(imagesData[position],
+                image,
+                token,
+                object : DemoGlideHelper.LoadingListener {
+                    override fun onSuccess() {
+                        progress.animate().cancel()
+                        progress.animate().alpha(0f)
+                    }
+
+                    override fun onError() {
+                        progress.animate().alpha(0f)
+                    }
+                })
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.demo_item_photo_full, parent, false)
-        val holder = ViewHolder(view)//todo check if it works
-        GestureViewSettings().applyDefault(holder.image)
-        holder.image.positionAnimator.addPositionUpdateListener { position: Float, isLeaving: Boolean ->
-            holder.progress.visibility = if (position == 1f) View.VISIBLE else View.INVISIBLE
+    inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+        //todo check if this works
+        private val defaultHttpDataSource = DefaultHttpDataSource.Factory()
+        private val dataSourceFactory = DataSource.Factory {
+            val dataSource: HttpDataSource = defaultHttpDataSource.createDataSource()
+            // Set a custom authentication request header.
+            dataSource.setRequestProperty("Authorization", token)
+            dataSource
+        }
+        private val exoPlayer by lazy {
+            ExoPlayer.Builder(itemView.context)
+                .setMediaSourceFactory(DefaultMediaSourceFactory(context)
+                    .setDataSourceFactory(dataSourceFactory))
+                .apply {
+                    setSeekBackIncrementMs(5000)
+                    setSeekForwardIncrementMs(5000)
+                }.build()
+        }
+        val gestureView: GestureFrameLayout = itemView.findViewById(R.id.video_view)
+        val video: StyledPlayerView = itemView.findViewById(R.id.full_videoPlayer)
+
+        fun bind(position: Int) {
+
+            video.apply {
+                player = exoPlayer
+                keepScreenOn = true
+            }
+
+            //todo change var name
+            val url = Constants.BASE_GET_IMAGES_URL + imagesData[position].id
+
+            exoPlayer.apply {
+                setMediaItem(MediaItem.fromUri(url))
+                prepare()
+            }
         }
 
-        val controller: GestureController = holder.image.controller
-        controller.addOnStateChangeListener(DynamicZoom(controller.settings))
-        return holder
+        override fun onClick(v: View?) {
+            val position = bindingAdapterPosition
+            if (position != RecyclerView.NO_POSITION)
+                listener.onFullImageClick()
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        GestureViewSettings().applyDefault(holder.image)
-        holder.progress.animate().setDuration(150L)
-            .setStartDelay(PROGRESS_DELAY)
-            .alpha(1f)
-        // Loading image
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == VIDEO_VIEW) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.demo_item_video_full, parent, false)
+            val holder = VideoViewHolder(view)
+            //todo do stuff
+            return holder
+        } else {
+            // Create a new view, which defines the UI of the list item
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.demo_item_photo_full, parent, false)
+            val holder = ImageViewHolder(view)
 
-        // Loading image
-        DemoGlideHelper().loadFull(imagesData[position], holder.image, token, object : DemoGlideHelper.LoadingListener {
-            override fun onSuccess() {
-                holder.progress.animate().cancel()
-                holder.progress.animate().alpha(0f)
+            GestureViewSettings().applyDefault(holder.image)
+            holder.image.positionAnimator.addPositionUpdateListener { position: Float, isLeaving: Boolean ->
+                holder.progress.visibility = if (position == 1f) View.VISIBLE else View.INVISIBLE
             }
 
-            override fun onError() {
-                holder.progress.animate().alpha(0f)
-            }
-        })
+            val controller: GestureController = holder.image.controller
+            controller.addOnStateChangeListener(DynamicZoom(controller.settings))
+            return holder
+        }
     }
 
-    override fun onViewRecycled(holder: ViewHolder) {
-        super.onViewRecycled(holder)
-        DemoGlideHelper().clear(holder.image)
-        holder.progress.animate().cancel()
-        holder.progress.alpha = 0f
-        holder.image.setImageDrawable(null)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (getItemViewType(position) == IMAGE_VIEW) {
+            (holder as ImageViewHolder).bind(position)
+        } else {
+            (holder as VideoViewHolder).bind(position)
+        }
     }
+
+//    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+//        super.onViewRecycled(holder)
+//        DemoGlideHelper().clear(holder.image)
+//        holder.progress.animate().cancel()
+//        holder.progress.alpha = 0f
+//        holder.image.setImageDrawable(null)
+//    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
@@ -103,9 +192,12 @@ class PagerAdapter(
         this.recyclerView = null
     }
 
-    fun getImage(pos: Int): GestureImageView? {
-        val holder = if (recyclerView == null) null else recyclerView!!.findViewHolderForLayoutPosition(pos)
-        return if (holder == null) null else (holder as ViewHolder).image
+    fun getMedia(pos: Int): View? {
+        val holder =
+            if (recyclerView == null) null else recyclerView!!.findViewHolderForLayoutPosition(pos)
+        return if (holder == null) null
+            else if(getItemViewType(pos) == VIDEO_VIEW) (holder as VideoViewHolder).gestureView
+            else (holder as ImageViewHolder).image
     }
 
     fun getImageData(pos: Int): ImageData? {

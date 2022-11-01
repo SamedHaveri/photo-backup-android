@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 import javax.inject.Inject
+import kotlin.math.log
 
 @HiltViewModel
 class PhotosViewModel @Inject constructor(
@@ -46,6 +47,7 @@ class PhotosViewModel @Inject constructor(
             mainRepository.getImages(myPreference.getStoredToken()).let {
                 if (it.code() == 200){
                     _imagesData.postValue(Resource.success(it.body()))
+                    Log.d("resp", it.body().toString())
                 } else if (it.code() == 403){
                     _imagesData.postValue(Resource.error("Token Expired", null))
                 }else {
