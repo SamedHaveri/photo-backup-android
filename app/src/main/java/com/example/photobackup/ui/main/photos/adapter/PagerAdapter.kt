@@ -1,6 +1,7 @@
 package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,6 +46,12 @@ class PagerAdapter(
             notifyDataSetChanged()
         }
     }
+
+    val exoPlayerPositionMap = mutableMapOf<Int, ExoPlayer>()
+    interface OnVideoPlayerReady {
+        fun addVideoPlayer(position: Int, player: ExoPlayer)
+    }
+
 
     companion object {
         const val IMAGE_VIEW = 1
@@ -101,7 +108,6 @@ class PagerAdapter(
     }
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        //todo check if this works
         private val defaultHttpDataSource = DefaultHttpDataSource.Factory()
         private val dataSourceFactory = DataSource.Factory {
             val dataSource: HttpDataSource = defaultHttpDataSource.createDataSource()
@@ -122,6 +128,8 @@ class PagerAdapter(
         val video: StyledPlayerView = itemView.findViewById(R.id.full_videoPlayer)
 
         fun bind(position: Int) {
+
+            exoPlayerPositionMap[position] = exoPlayer
 
             video.apply {
                 player = exoPlayer
@@ -190,6 +198,24 @@ class PagerAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = null
+    }
+
+    //pause video on next page
+    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        Log.d("TEST", "onViewDetachedFromWindow: Player Cool ?")
+        exoPlayerPositionMap?.values?.forEach {
+            it.stop()
+        }
+        val player = exoPlayerPositionMap[holder.absoluteAdapterPosition] ?: return
+        player.stop()
+    }
+
+    override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        exoPlayerPositionMap?.values?.forEach {
+            it.pause()
+        }
     }
 
     fun getMedia(pos: Int): View? {

@@ -169,6 +169,27 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             views!!.pagerToolbar.animate().alpha(alpha)
             views!!.pagerTitle.animate().alpha(alpha)
         }
+        views!!.pager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int,
+            ) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                val playerRight = pagerAdapter!!.exoPlayerPositionMap[position+1]
+                playerRight?.stop()
+                val playerLeft = pagerAdapter!!.exoPlayerPositionMap[position-1]
+                playerLeft?.stop()
+            }
+
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+                super.onPageScrollStateChanged(state)
+            }
+        })
     }
 
     /**
@@ -226,6 +247,13 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
     override fun onPhotoClick(position: Int) {
         pagerAdapter!!.setActivated(true)
         listAnimator!!.enter(position, true)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pagerAdapter?.exoPlayerPositionMap?.values?.forEach {
+            it.stop()
+        }
     }
 
     /**
