@@ -12,6 +12,13 @@
         app:gest_doubleTapZoom="3"
         app:gest_maxZoom="4" />
 
+    <com.alexvasilkov.gestures.views.GestureImageView
+            android:id="@+id/photo_thumb_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:gest_doubleTapZoom="3"
+            app:gest_maxZoom="4" />
+
     <ProgressBar
         android:id="@+id/photo_full_progress"
         android:layout_width="320dp"

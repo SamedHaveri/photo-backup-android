@@ -5,6 +5,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+    <com.alexvasilkov.gestures.views.GestureImageView
+            android:id="@+id/photo_thumb_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:gest_doubleTapZoom="3"
+            app:gest_maxZoom="4" />
+
     <com.alexvasilkov.gestures.views.GestureFrameLayout
             android:id="@+id/video_view"
             android:layout_width="match_parent"

@@ -69,11 +69,13 @@ class PagerAdapter(
     inner class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view),
         View.OnClickListener {
         internal var image: GestureImageView
+        internal var thumbImage: GestureImageView
         internal var progress: View
 
         init {
             image = view.findViewById(R.id.photo_full_image)
             image.setOnClickListener(this)
+            thumbImage = view.findViewById(R.id.photo_thumb_image)
             progress = view.findViewById(R.id.photo_full_progress)
         }
 
@@ -89,6 +91,8 @@ class PagerAdapter(
                 .setStartDelay(PROGRESS_DELAY)
                 .alpha(1f)
             // Loading image
+
+            DemoGlideHelper().loadThumb(imagesData[position], thumbImage, token)
 
             // Loading image
             DemoGlideHelper().loadFull(imagesData[position],
@@ -136,7 +140,7 @@ class PagerAdapter(
                 keepScreenOn = true
             }
 
-            //todo change var name
+            //todo change var name // why
             val url = Constants.BASE_GET_IMAGES_URL + imagesData[position].id
 
             exoPlayer.apply {
@@ -166,8 +170,12 @@ class PagerAdapter(
             val holder = ImageViewHolder(view)
 
             GestureViewSettings().applyDefault(holder.image)
-            holder.image.positionAnimator.addPositionUpdateListener { position: Float, isLeaving: Boolean ->
+            GestureViewSettings().applyDefault(holder.thumbImage)
+
+            holder.thumbImage.positionAnimator.addPositionUpdateListener { position: Float, isLeaving: Boolean ->
                 holder.progress.visibility = if (position == 1f) View.VISIBLE else View.INVISIBLE
+                holder.thumbImage.visibility = if (position == 1f) View.INVISIBLE else View.VISIBLE
+                holder.image.visibility = if (position == 1f) View.VISIBLE else View.INVISIBLE
             }
 
             val controller: GestureController = holder.image.controller
@@ -203,7 +211,6 @@ class PagerAdapter(
     //pause video on next page
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
         super.onViewDetachedFromWindow(holder)
-        Log.d("TEST", "onViewDetachedFromWindow: Player Cool ?")
         exoPlayerPositionMap?.values?.forEach {
             it.stop()
         }
@@ -223,7 +230,7 @@ class PagerAdapter(
             if (recyclerView == null) null else recyclerView!!.findViewHolderForLayoutPosition(pos)
         return if (holder == null) null
             else if(getItemViewType(pos) == VIDEO_VIEW) (holder as VideoViewHolder).gestureView
-            else (holder as ImageViewHolder).image
+            else (holder as ImageViewHolder).thumbImage
     }
 
     fun getImageData(pos: Int): ImageData? {

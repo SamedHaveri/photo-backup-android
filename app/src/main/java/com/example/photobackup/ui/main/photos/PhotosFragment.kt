@@ -25,6 +25,7 @@ import com.example.photobackup.other.Status
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -51,25 +52,25 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
 //        setAppBarStateListAnimator(views.appBar)
         initDecorMargins()
 
-//        var bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-//        bottomNavigationView.selectedItemId = R.id.navigation_home
-//        @Suppress("DEPRECATION")
-//        bottomNavigationView.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
-//            when (item.itemId) {
-//                R.id.navigation_dashboard -> {
-////                    startActivity(Intent(applicationContext, DashBoard::class.java))
-//                    overridePendingTransition(0, 0)
-//                    return@OnNavigationItemSelectedListener true
-//                }
-//                R.id.home -> return@OnNavigationItemSelectedListener true
-//                R.id.navigation_notifications -> {
-////                    startActivity(Intent(applicationContext, About::class.java))
-//                    overridePendingTransition(0, 0)
-//                    return@OnNavigationItemSelectedListener true
-//                }
-//            }
-//            false
-//        })
+        var bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.selectedItemId = R.id.navigation_home
+        @Suppress("DEPRECATION")
+        bottomNavigationView.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_dashboard -> {
+//                    startActivity(Intent(applicationContext, DashBoard::class.java))
+                    overridePendingTransition(0, 0)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.home -> return@OnNavigationItemSelectedListener true
+                R.id.navigation_notifications -> {
+//                    startActivity(Intent(applicationContext, About::class.java))
+                    overridePendingTransition(0, 0)
+                    return@OnNavigationItemSelectedListener true
+                }
+            }
+            false
+        })
 
         val imagesData = photosViewModel.imageData.observe(this, Observer {
             when (it.status) {
