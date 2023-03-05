@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <application
             android:name=".BaseApplication"
             android:allowBackup="true"
@@ -27,6 +30,17 @@
                 android:name=".ui.main.photos.PhotosFragment"
                 android:theme="@style/Theme.PhotoBackup.NoTitle">
         </activity>
+        <service android:name=".service.PhotosContentJob"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+        <service android:name=".service.MediaUploadService"
+                android:foregroundServiceType="dataSync">
+            <meta-data
+                    android:name="com.example.notification_channel_id"
+                    android:value="com.example.photobackup.service.MediaUploadService" />
+<!--            todo not like this static shit above-->
+        </service>
     </application>
+
 
 </manifest>

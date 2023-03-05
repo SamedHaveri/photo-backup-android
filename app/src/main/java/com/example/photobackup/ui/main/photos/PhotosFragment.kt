@@ -1,7 +1,12 @@
 package com.example.photobackup.ui.main.photos
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
@@ -9,6 +14,8 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +29,8 @@ import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
 import com.example.photobackup.models.imageDownload.ImageData
 import com.example.photobackup.other.Status
+import com.example.photobackup.service.PhotosContentJob
+import com.example.photobackup.ui.login.LoginActivity
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
@@ -33,7 +42,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
 
     private val NO_POSITION = -1
-
+    private val STORAGE_PERMISSION_CODE = 1
     private var views: ViewHolder? = null
     private var imageAnimator: ViewsTransitionAnimator<*>? = null
     private var listAnimator: ViewsTransitionAnimator<Int>? = null
@@ -48,6 +57,36 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         this.views = ViewHolder(this)
         val photosViewModel: PhotosViewModel by viewModels()
         val authDetails = photosViewModel.authDetails
+
+        if (ContextCompat.checkSelfPermission(applicationContext,
+                READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
+                AlertDialog.Builder(this)
+                    .setTitle("Permission Needed")
+                    .setMessage("Storage permission required for media sync")
+                    .setPositiveButton("ok") { dialog, which ->
+                        ActivityCompat.requestPermissions(this,
+                            arrayOf(READ_EXTERNAL_STORAGE),
+                            STORAGE_PERMISSION_CODE)
+                    }
+                    .setNegativeButton("cancel") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+            } else {
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(READ_EXTERNAL_STORAGE),
+                    STORAGE_PERMISSION_CODE)
+            }
+        }
+
+        if(!PhotosContentJob.isScheduled(baseContext)){
+            PhotosContentJob.scheduleJob(baseContext);
+        }else{
+            Log.d("upload", "Job already scheduled")
+        }
 
 //        setAppBarStateListAnimator(views.appBar)
         initDecorMargins()
@@ -94,6 +133,21 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             }
         })
         //todo save position
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permission DENIED", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 //    override fun onCreate(savedInstanceState: Bundle?) {
@@ -177,9 +231,9 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
                 positionOffsetPixels: Int,
             ) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-                val playerRight = pagerAdapter!!.exoPlayerPositionMap[position+1]
+                val playerRight = pagerAdapter!!.exoPlayerPositionMap[position + 1]
                 playerRight?.stop()
-                val playerLeft = pagerAdapter!!.exoPlayerPositionMap[position-1]
+                val playerLeft = pagerAdapter!!.exoPlayerPositionMap[position - 1]
                 playerLeft?.stop()
             }
 
@@ -280,7 +334,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
     }
 
     private class ViewHolder(activity: Activity) {
-//        val toolbar: Toolbar
+        //        val toolbar: Toolbar
         val appBar: View
         val grid: RecyclerView
         val fullBackground: View
