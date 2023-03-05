@@ -122,7 +122,7 @@ class PhotosContentJob : JobService() {
 
     companion object {
         //in future we will support different folders to observe all in one job i guess ?
-        val jobId = 546863151; //todo make this better than just placing it here ?
+        const val jobId = 546863151; //todo make this better than just placing it here ?
 
         // The root URI of the media provider, to monitor for generic changes to its content.
         val MEDIA_URI = Uri.parse("content://" + MediaStore.AUTHORITY + "/")
@@ -162,7 +162,6 @@ class PhotosContentJob : JobService() {
 
         // Schedule this job, replace any existing one.
         fun scheduleJob(context: Context) {
-            //only works with context sooo... above code is useless here
             val builder = JobInfo.Builder(jobId,
                 ComponentName(context, PhotosContentJob::class.java.name))
             // Look for specific changes to images in the provider.
