@@ -82,8 +82,8 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             }
         }
 
-        if(!PhotosContentJob.isScheduled(baseContext)){
-            PhotosContentJob.scheduleJob(baseContext);
+        if(!PhotosContentJob.isScheduled(applicationContext)){
+            PhotosContentJob.scheduleJob(applicationContext);
         }else{
             Log.d("upload", "Job already scheduled")
         }

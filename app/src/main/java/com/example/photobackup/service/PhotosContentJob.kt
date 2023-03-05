@@ -16,6 +16,8 @@ import android.provider.MediaStore
 import android.provider.MediaStore.Audio.Media
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import com.example.photobackup.di.AppModule
 import javax.inject.Inject
 
@@ -142,6 +144,10 @@ class PhotosContentJob : JobService() {
         // A pre-built JobInfo we use for scheduling our job.
         var JOB_INFO: JobInfo? = null
 
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
         init {
             val builder = JobInfo.Builder(jobId,
                 ComponentName("com.example.photobackup.service", PhotosContentJob::class.java.name))
@@ -151,7 +157,7 @@ class PhotosContentJob : JobService() {
                 TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS))
             // Also look for general reports of changes in the overall provider.
             builder.addTriggerContentUri(TriggerContentUri(MEDIA_URI, 0))
-            JOB_INFO = builder.build()
+            JOB_INFO = builder.setRequiredNetworkType(NetworkType.CONNECTED.ordinal).build()
         }
 
         // Schedule this job, replace any existing one.
@@ -165,7 +171,7 @@ class PhotosContentJob : JobService() {
                 TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS))
             // Also look for general reports of changes in the overall provider.
             builder.addTriggerContentUri(TriggerContentUri(MEDIA_URI, 0))
-            JOB_INFO = builder.build()
+            JOB_INFO = builder.setRequiredNetworkType(NetworkType.CONNECTED.ordinal).build()
             val js = context.getSystemService(JobScheduler::class.java)
             js.schedule(JOB_INFO!!)
             Log.i("PhotosContent", "JOB SCHEDULED!")
