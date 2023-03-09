@@ -2,7 +2,7 @@ package com.example.photobackup.api
 
 import com.example.photobackup.models.auth.AuthRequest
 import com.example.photobackup.models.auth.AuthResponse
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -14,7 +14,7 @@ interface ApiService {
     suspend fun authenticate(@Body auth: AuthRequest): Response<AuthResponse>
 
     @GET("media")
-    suspend fun getImages(@Header("Authorization") authToken:String): Response<List<ImageData>>
+    suspend fun getImages(@Header("Authorization") authToken:String): Response<List<MediaData>>
 
     @GET("media/download/id{id}")
     suspend fun downloadImage(@Path("id") id: Int, @Header("Authorization") token: String): Response<ResponseBody>

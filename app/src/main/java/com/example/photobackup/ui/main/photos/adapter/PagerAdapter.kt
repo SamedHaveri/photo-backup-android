@@ -1,7 +1,6 @@
 package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,7 @@ import com.alexvasilkov.gestures.State
 import com.alexvasilkov.gestures.views.GestureFrameLayout
 import com.alexvasilkov.gestures.views.GestureImageView
 import com.example.photobackup.R
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.util.DemoGlideHelper
 import com.example.photobackup.util.GestureViewSettings
@@ -28,7 +27,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 
 class PagerAdapter(
     private val context: Context,
-    private var imagesData: MutableList<ImageData>,
+    private var mediaData: MutableList<MediaData>,
     private val token: String,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -59,7 +58,7 @@ class PagerAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (imagesData[position].mediaType) {
+        return when (mediaData[position].mediaType) {
             Constants.VIDEO_TYPE -> VIDEO_VIEW
             Constants.IMAGE_TYPE -> IMAGE_VIEW
             else -> -1
@@ -92,10 +91,10 @@ class PagerAdapter(
                 .alpha(1f)
             // Loading image
 
-            DemoGlideHelper().loadThumb(imagesData[position], thumbImage, token)
+            DemoGlideHelper().loadThumb(mediaData[position], thumbImage, token)
 
             // Loading image
-            DemoGlideHelper().loadFull(imagesData[position],
+            DemoGlideHelper().loadFull(mediaData[position],
                 image,
                 token,
                 object : DemoGlideHelper.LoadingListener {
@@ -130,8 +129,16 @@ class PagerAdapter(
         }
         val gestureView: GestureFrameLayout = itemView.findViewById(R.id.video_view)
         val video: StyledPlayerView = itemView.findViewById(R.id.full_videoPlayer)
+//        val videoThumbnail: GestureImageView = itemView.findViewById(R.id.video_thumb_image)
 
         fun bind(position: Int) {
+
+            // load thumbnail, looks like shit
+//            DemoGlideHelper().loadThumb(mediaData[position], videoThumbnail, token)
+//            videoThumbnail.visibility = View.INVISIBLE
+
+            //do not show frame ? bugfix
+//            gestureView.visibility = View.INVISIBLE
 
             exoPlayerPositionMap[position] = exoPlayer
 
@@ -140,8 +147,7 @@ class PagerAdapter(
                 keepScreenOn = true
             }
 
-            //todo change var name // why
-            val url = Constants.BASE_GET_IMAGES_URL + imagesData[position].id
+            val url = Constants.BASE_GET_MEDIA_URL + mediaData[position].id
 
             exoPlayer.apply {
                 setMediaItem(MediaItem.fromUri(url))
@@ -161,7 +167,12 @@ class PagerAdapter(
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.demo_item_video_full, parent, false)
             val holder = VideoViewHolder(view)
-            //todo do stuff
+//            GestureViewSettings().applyDefault(holder.videoThumbnail)
+
+//            holder.videoThumbnail.positionAnimator.addPositionUpdateListener { position: Float, isLeaving: Boolean ->
+//                holder.videoThumbnail.visibility = if (position == 1f) View.INVISIBLE else View.VISIBLE
+//            }
+
             return holder
         } else {
             // Create a new view, which defines the UI of the list item
@@ -221,7 +232,7 @@ class PagerAdapter(
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
         super.onViewAttachedToWindow(holder)
         exoPlayerPositionMap?.values?.forEach {
-            it.pause()
+            it.stop()
         }
     }
 
@@ -233,18 +244,18 @@ class PagerAdapter(
             else (holder as ImageViewHolder).thumbImage
     }
 
-    fun getImageData(pos: Int): ImageData? {
-        return if (pos < 0 || pos >= imagesData.size) null else imagesData[pos]
+    fun getMediaData(pos: Int): MediaData? {
+        return if (pos < 0 || pos >= mediaData.size) null else mediaData[pos]
     }
 
-    fun removeItem(imgToDel: ImageData) {
-        val pos = imagesData.indexOf(imgToDel)
-        imagesData.remove(imgToDel)
+    fun removeItem(imgToDel: MediaData) {
+        val pos = mediaData.indexOf(imgToDel)
+        mediaData.remove(imgToDel)
         notifyItemRemoved(pos)
     }
 
     override fun getItemCount(): Int {
-        return if (!activated) 0 else imagesData.size
+        return if (!activated) 0 else mediaData.size
     }
 
     interface ImageClickListener {

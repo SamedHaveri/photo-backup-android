@@ -1,39 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<com.alexvasilkov.gestures.views.GestureFrameLayout
+        android:id="@+id/video_view"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-    <com.alexvasilkov.gestures.views.GestureImageView
-            android:id="@+id/photo_thumb_image"
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/full_videoPlayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:gest_doubleTapZoom="3"
-            app:gest_maxZoom="4" />
-
-    <com.alexvasilkov.gestures.views.GestureFrameLayout
-            android:id="@+id/video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:gest_zoomEnabled="false"
-            app:gest_doubleTapEnabled="false"
-            app:gest_rotationEnabled="false"
-            app:gest_fillViewport="true"
-            app:gest_boundsType="normal">
-
-        <com.google.android.exoplayer2.ui.StyledPlayerView
-                android:id="@+id/full_videoPlayer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-    </com.alexvasilkov.gestures.views.GestureFrameLayout>
-    <ProgressBar
-            android:id="@+id/photo_full_progress"
-            android:layout_width="320dp"
-            android:layout_height="320dp"
-            android:layout_gravity="center"
-            android:alpha="0"
-            android:padding="142dp" />
-
-</FrameLayout>
+            app:show_buffering="when_playing"
+            app:use_artwork="true"/>
+</com.alexvasilkov.gestures.views.GestureFrameLayout>

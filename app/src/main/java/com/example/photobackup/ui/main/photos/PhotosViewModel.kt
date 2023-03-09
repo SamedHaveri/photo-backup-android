@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Resource
 import com.example.photobackup.repository.MainRepository
@@ -30,8 +30,8 @@ class PhotosViewModel @Inject constructor(
 
     val authDetails by lazy { myPreference.getStoredAuthDetails() }
 
-    private val _imagesData = MutableLiveData<Resource<List<ImageData>>>()
-    val imageData: LiveData<Resource<List<ImageData>>>
+    private val _imagesData = MutableLiveData<Resource<List<MediaData>>>()
+    val mediaData: LiveData<Resource<List<MediaData>>>
         get() = _imagesData
 
     private val _savedPagerPosition = MutableLiveData<Int>()

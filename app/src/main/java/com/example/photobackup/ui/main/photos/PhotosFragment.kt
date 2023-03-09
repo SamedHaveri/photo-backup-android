@@ -27,8 +27,7 @@ import com.alexvasilkov.gestures.transition.GestureTransitions
 import com.alexvasilkov.gestures.transition.ViewsTransitionAnimator
 import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
-import com.example.photobackup.models.auth.AuthDetails
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Status
 import com.example.photobackup.repository.MainRepository
 import com.example.photobackup.service.PhotosContentJob
@@ -38,8 +37,6 @@ import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 
@@ -126,7 +123,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             false
         })
 
-        val imagesData = photosViewModel.imageData.observe(this, Observer {
+        val imagesData = photosViewModel.mediaData.observe(this, Observer {
             when (it.status) {
                 Status.SUCCESS -> {
                     initGrid(it.data!!, authDetails.token!!)
@@ -200,7 +197,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         DecorUtils.margin(views!!.pagerTitle, Gravity.BOTTOM)
     }
 
-    private fun initGrid(imagesData: List<ImageData>, token: String) {
+    private fun initGrid(imagesData: List<MediaData>, token: String) {
         // Setting up images grid
         val cols = resources.getInteger(R.integer.images_grid_columns)
         views!!.grid.layoutManager = GridLayoutManager(this, cols)
@@ -208,7 +205,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         views!!.grid.adapter = gridAdapter
     }
 
-    private fun initPager(imagesData: List<ImageData>, token: String) {
+    private fun initPager(imagesData: List<MediaData>, token: String) {
         // Setting up pager adapter
         pagerAdapter = PagerAdapter(this, imagesData.toMutableList(), token)
         // Enabling immersive mode by clicking on full screen image
@@ -266,8 +263,8 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
      * Setting up photo title for current pager position.
      */
     private fun onPhotoInPagerSelected(position: Int) {
-        val imageData: ImageData? = pagerAdapter!!.getImageData(position)
-        if (imageData == null) {
+        val mediaData: MediaData? = pagerAdapter!!.getMediaData(position)
+        if (mediaData == null) {
             views!!.pagerTitle.text = null
         } else {
             val title = SpannableBuilder(this)
@@ -325,7 +322,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             .setMessage("Are you sure you want to delete this item ?")
             .setPositiveButton("Ok") { dialog, which ->
                 val itemToDelete = views!!.pager.currentItem
-                val mediaToDelete = pagerAdapter!!.getImageData(itemToDelete)
+                val mediaToDelete = pagerAdapter!!.getMediaData(itemToDelete)
                 //todo make api call to remove item
                 Log.d("delete", "making delete api call")
                 viewModel.deleteMedia(mediaToDelete!!.id)

@@ -1,22 +1,20 @@
 package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.photobackup.R
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.util.DemoGlideHelper
-import kotlin.streams.toList
 
 
 class RecyclerAdapter(
     private val listener: OnPhotoListener,
     private val context: Context,
-    private var imagesData: MutableList<ImageData>,
+    private var mediaData: MutableList<MediaData>,
     private val token: String,
 ) :
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
@@ -49,7 +47,7 @@ class RecyclerAdapter(
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 //        viewHolder.image.setTag(R.tag_item, imagesData[position])
-        DemoGlideHelper().loadThumb(imagesData[position], viewHolder.image, token)
+        DemoGlideHelper().loadThumb(mediaData[position], viewHolder.image, token)
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
@@ -67,9 +65,9 @@ class RecyclerAdapter(
         this.recyclerView = recyclerView
     }
 
-    fun removeItem(imgToDel: ImageData) {
-        val pos = imagesData.indexOf(imgToDel)
-        imagesData.remove(imgToDel)
+    fun removeItem(mediaToDel: MediaData) {
+        val pos = mediaData.indexOf(mediaToDel)
+        mediaData.remove(mediaToDel)
         notifyItemRemoved(pos)
     }
 
@@ -79,7 +77,7 @@ class RecyclerAdapter(
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = imagesData.size
+    override fun getItemCount() = mediaData.size
     interface OnPhotoListener {
         fun onPhotoClick(position: Int)
     }

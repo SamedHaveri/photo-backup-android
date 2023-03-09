@@ -17,7 +17,7 @@ import com.bumptech.glide.request.transition.NoTransition
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.request.transition.Transition.ViewAdapter
 import com.bumptech.glide.request.transition.TransitionFactory
-import com.example.photobackup.models.imageDownload.ImageData
+import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 
 class DemoGlideHelper {
@@ -38,14 +38,14 @@ class DemoGlideHelper {
         TransitionFactory { dataSource: DataSource, _: Boolean ->
             if (dataSource == DataSource.REMOTE) TRANSITION else NoTransition.get() }
 
-    fun loadThumb(imageData: ImageData, image:ImageView, token:String){
+    fun loadThumb(mediaData: MediaData, image:ImageView, token:String){
         val thumbUrl = GlideUrl(
-            Constants.BASE_GET_THUMBNAIL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_THUMBNAIL+mediaData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
         val mediumUrl = GlideUrl(
-            Constants.BASE_GET_MID_THUMBNAIL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_MID_THUMBNAIL+mediaData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
@@ -70,14 +70,14 @@ class DemoGlideHelper {
             .into(image)
     }
 
-    fun loadFull(imageData: ImageData, image: ImageView, token: String, listener: LoadingListener){
+    fun loadFull(mediaData: MediaData, image: ImageView, token: String, listener: LoadingListener){
         val thumbUrl = GlideUrl(
-            Constants.BASE_GET_MID_THUMBNAIL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_MID_THUMBNAIL+mediaData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
         val fullUrl = GlideUrl(
-            Constants.BASE_GET_IMAGES_URL+imageData.id, LazyHeaders.Builder()
+            Constants.BASE_GET_MEDIA_URL+mediaData.id, LazyHeaders.Builder()
                 .addHeader("Authorization", token)
                 .build()
         )
