@@ -78,7 +78,8 @@
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/demo_pager_toolbar"
             style="@style/App.Toolbar.Transparent"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            app:menu="@menu/media_options_menu"/>
 
     <TextView
             android:id="@+id/demo_pager_title"

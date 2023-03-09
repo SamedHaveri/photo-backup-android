@@ -11,4 +11,5 @@ class MainRepository @Inject constructor(
     suspend fun authenticate(authRequest: AuthRequest) = apiHelper.authenticate(authRequest)
     suspend fun getImages(authToken:String) = apiHelper.getImages(authToken)
     suspend fun uploadMedia(authToken: String, file : MultipartBody.Part) = apiHelper.uploadMedia(authToken, file)
+    suspend fun deleteMedia(authToken: String, id: Int) = apiHelper.deleteMedia(authToken, id)
 }

@@ -21,6 +21,9 @@ interface ApiService {
 
     @Multipart
     @POST("media/upload")
-    suspend fun uploadMedia(@Header("Authorization") authToken:String, @Part file: MultipartBody.Part): Response<Void>
+    suspend fun uploadMedia(@Header("Authorization") authToken:String, @Part file: MultipartBody.Part): Response<ResponseBody>
+
+    @DELETE("media/id{id}")
+    suspend fun deleteMedia(@Header("Authorization") authToken:String, @Path("id") id: Int): Response<ResponseBody>
 
 }

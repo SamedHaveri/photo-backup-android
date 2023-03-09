@@ -3,11 +3,11 @@ package com.example.photobackup.ui.main.photos
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -27,19 +27,27 @@ import com.alexvasilkov.gestures.transition.GestureTransitions
 import com.alexvasilkov.gestures.transition.ViewsTransitionAnimator
 import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
+import com.example.photobackup.models.auth.AuthDetails
 import com.example.photobackup.models.imageDownload.ImageData
 import com.example.photobackup.other.Status
+import com.example.photobackup.repository.MainRepository
 import com.example.photobackup.service.PhotosContentJob
-import com.example.photobackup.ui.login.LoginActivity
+import com.example.photobackup.service.VideosContentJob
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
+
+    @Inject
+    lateinit var repository: MainRepository
 
     private val NO_POSITION = -1
     private val STORAGE_PERMISSION_CODE = 1
@@ -49,13 +57,14 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
     private var gridAdapter: RecyclerAdapter? = null
     private var pagerAdapter: PagerAdapter? = null
     private var pagerListener: OnPageChangeCallback? = null
-
+    private lateinit var viewModel : PhotosViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_photos)
         this.views = ViewHolder(this)
         val photosViewModel: PhotosViewModel by viewModels()
+        viewModel = photosViewModel
         val authDetails = photosViewModel.authDetails
 
         if (ContextCompat.checkSelfPermission(applicationContext,
@@ -83,9 +92,15 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         }
 
         if(!PhotosContentJob.isScheduled(applicationContext)){
-            PhotosContentJob.scheduleJob(applicationContext);
+            PhotosContentJob.scheduleJob(applicationContext)
         }else{
-            Log.d("upload", "Job already scheduled")
+            Log.d("PhotoContent", "Job already scheduled")
+        }
+
+        if(!VideosContentJob.isScheduled(applicationContext)){
+            VideosContentJob.scheduleJob(applicationContext)
+        }else{
+            Log.d("VideoContent", "Job already scheduled")
         }
 
 //        setAppBarStateListAnimator(views.appBar)
@@ -115,7 +130,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
             when (it.status) {
                 Status.SUCCESS -> {
                     initGrid(it.data!!, authDetails.token!!)
-                    initPager(it.data, authDetails.token)
+                    initPager(it.data!!, authDetails.token!!)
                     initPagerAnimator()
 
 //                    if (savedPagerPosition != NO_POSITION) {
@@ -189,13 +204,13 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         // Setting up images grid
         val cols = resources.getInteger(R.integer.images_grid_columns)
         views!!.grid.layoutManager = GridLayoutManager(this, cols)
-        gridAdapter = RecyclerAdapter(this, this, imagesData, token)
+        gridAdapter = RecyclerAdapter(this, this, imagesData.toMutableList(), token)
         views!!.grid.adapter = gridAdapter
     }
 
     private fun initPager(imagesData: List<ImageData>, token: String) {
         // Setting up pager adapter
-        pagerAdapter = PagerAdapter(this, imagesData, token)
+        pagerAdapter = PagerAdapter(this, imagesData.toMutableList(), token)
         // Enabling immersive mode by clicking on full screen image
         pagerAdapter!!.setImageClickListener(object : PagerAdapter.ImageClickListener {
             override fun onFullImageClick() {
@@ -302,6 +317,27 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
     override fun onPhotoClick(position: Int) {
         pagerAdapter!!.setActivated(true)
         listAnimator!!.enter(position, true)
+    }
+
+    fun onClickDeleteMedia(item: MenuItem) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete")
+            .setMessage("Are you sure you want to delete this item ?")
+            .setPositiveButton("Ok") { dialog, which ->
+                val itemToDelete = views!!.pager.currentItem
+                val mediaToDelete = pagerAdapter!!.getImageData(itemToDelete)
+                //todo make api call to remove item
+                Log.d("delete", "making delete api call")
+                viewModel.deleteMedia(mediaToDelete!!.id)
+                pagerAdapter!!.removeItem(mediaToDelete!!)
+                gridAdapter!!.removeItem(mediaToDelete!!)
+                Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     override fun onPause() {

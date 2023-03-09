@@ -28,7 +28,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 
 class PagerAdapter(
     private val context: Context,
-    private val imagesData: List<ImageData>,
+    private var imagesData: MutableList<ImageData>,
     private val token: String,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -235,6 +235,12 @@ class PagerAdapter(
 
     fun getImageData(pos: Int): ImageData? {
         return if (pos < 0 || pos >= imagesData.size) null else imagesData[pos]
+    }
+
+    fun removeItem(imgToDel: ImageData) {
+        val pos = imagesData.indexOf(imgToDel)
+        imagesData.remove(imgToDel)
+        notifyItemRemoved(pos)
     }
 
     override fun getItemCount(): Int {

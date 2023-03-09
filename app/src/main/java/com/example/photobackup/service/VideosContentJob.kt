@@ -1,5 +1,6 @@
 package com.example.photobackup.service
 
+
 import android.annotation.SuppressLint
 import android.app.job.JobInfo
 import android.app.job.JobInfo.TriggerContentUri
@@ -19,11 +20,13 @@ import androidx.annotation.RequiresApi
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import com.example.photobackup.data.MediaDatabase
+import com.example.photobackup.data.UploadedMedediaDao
 import com.example.photobackup.data.UploadedMedia
 import com.example.photobackup.data.UploadedMediaRepository
 import com.example.photobackup.di.AppModule
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -31,7 +34,7 @@ import javax.inject.Inject
  * Example stub job to monitor when there is a change to photos in the media provider.
  */
 @SuppressLint("SpecifyJobSchedulerIdRange")
-class PhotosContentJob : JobService() {
+class VideosContentJob : JobService() {
     var mRunningParams: JobParameters? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -40,7 +43,7 @@ class PhotosContentJob : JobService() {
         val absolutePaths = ArrayList<String>()
         // Instead of real work, we are going to build a string to show to the user.
         val sb = StringBuilder()
-        Log.d("Job", "Job started (photos)")
+        Log.d("Job", "Job started (video)")
 
         // Did we trigger due to a content change?
         if (params.triggeredContentAuthorities != null) {
@@ -58,9 +61,9 @@ class PhotosContentJob : JobService() {
                         continue
                     }else{
                         runBlocking { launch {
-                            val uploadedMedia = UploadedMedia(1, uri.path!!)
-                            uploadedMediaRepository.insertUploadedMedia(uploadedMedia);
-                        }
+                                val uploadedMedia = UploadedMedia(1, uri.path!!)
+                                uploadedMediaRepository.insertUploadedMedia(uploadedMedia);
+                            }
                         }
                     }
                     val path = uri.pathSegments
@@ -80,7 +83,7 @@ class PhotosContentJob : JobService() {
                         if (selection.isNotEmpty()) {
                             selection.append(" OR ")
                         }
-                        selection.append(MediaStore.Images.ImageColumns._ID)
+                        selection.append(MediaStore.Video.VideoColumns._ID)
                         selection.append("='")
                         selection.append(ids[i])
                         selection.append("'")
@@ -91,7 +94,7 @@ class PhotosContentJob : JobService() {
                     var haveFiles = false
                     try {
                         cursor = contentResolver.query(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             PROJECTION, selection.toString(), null, null)
                         while (cursor!!.moveToNext()) {
                             // We only care about files in the DCIM directory.
@@ -121,10 +124,10 @@ class PhotosContentJob : JobService() {
                 rescanNeeded = true
             }
             if (rescanNeeded) {
-                sb.append("Photos rescan needed!")
+                sb.append("Video rescan needed!")
             }
         } else {
-            sb.append("(No photos content)")
+            sb.append("(No video content)")
         }
 
         //todo figure out dependency injection and implement here
@@ -134,23 +137,23 @@ class PhotosContentJob : JobService() {
     }
 
     override fun onStopJob(params: JobParameters): Boolean {
-        Log.d("PhotosContent", "Job Stopped (photos)")
+        Log.d("VideoContent", "Job Stopped (video)")
         return false
     }
 
     companion object {
         //in future we will support different folders to observe all in one job i guess ?
-        const val jobId = 546863151; //todo make this better than just placing it here ?
+        const val jobId = 546863626; //todo make this better than just placing it here ?
 
         // The root URI of the media provider, to monitor for generic changes to its content.
         val MEDIA_URI = Uri.parse("content://" + MediaStore.AUTHORITY + "/")
 
         // Path segments for image-specific URIs in the provider.
-        val EXTERNAL_PATH_SEGMENTS = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.pathSegments
+        val EXTERNAL_PATH_SEGMENTS = MediaStore.Video.Media.EXTERNAL_CONTENT_URI.pathSegments
 
         // The columns we want to retrieve about a particular image.
         val PROJECTION = arrayOf(
-            MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA
+            MediaStore.Video.VideoColumns._ID, MediaStore.Video.VideoColumns.DATA
         )
         const val PROJECTION_ID = 0
         const val PROJECTION_DATA = 1
@@ -164,10 +167,10 @@ class PhotosContentJob : JobService() {
 
         init {
             val builder = JobInfo.Builder(jobId,
-                ComponentName("com.example.photobackup.service", PhotosContentJob::class.java.name))
+                ComponentName("com.example.photobackup.service", VideosContentJob::class.java.name))
             // Look for specific changes to images in the provider.
             builder.addTriggerContentUri(TriggerContentUri(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS))
             // Also look for general reports of changes in the overall provider.
 //            builder.addTriggerContentUri(TriggerContentUri(MEDIA_URI, 0))
@@ -177,17 +180,17 @@ class PhotosContentJob : JobService() {
         // Schedule this job, replace any existing one.
         fun scheduleJob(context: Context) {
             val builder = JobInfo.Builder(jobId,
-                ComponentName(context, PhotosContentJob::class.java.name))
+                ComponentName(context, VideosContentJob::class.java.name))
             // Look for specific changes to images in the provider.
             builder.addTriggerContentUri(TriggerContentUri(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS))
             // Also look for general reports of changes in the overall provider.
 //            builder.addTriggerContentUri(TriggerContentUri(MEDIA_URI, 0))
             JOB_INFO = builder.setRequiredNetworkType(NetworkType.CONNECTED.ordinal).build()
             val js = context.getSystemService(JobScheduler::class.java)
             js.schedule(JOB_INFO!!)
-            Log.i("PhotosContent", "JOB SCHEDULED!")
+            Log.i("VideoContent", "JOB SCHEDULED!")
         }
 
         // Check whether this job is currently scheduled.

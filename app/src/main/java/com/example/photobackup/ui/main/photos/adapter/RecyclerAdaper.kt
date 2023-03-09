@@ -1,6 +1,7 @@
 package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.photobackup.R
 import com.example.photobackup.models.imageDownload.ImageData
 import com.example.photobackup.util.DemoGlideHelper
+import kotlin.streams.toList
 
 
 class RecyclerAdapter(
     private val listener: OnPhotoListener,
     private val context: Context,
-    private val imagesData: List<ImageData>,
+    private var imagesData: MutableList<ImageData>,
     private val token: String,
 ) :
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
@@ -63,6 +65,12 @@ class RecyclerAdapter(
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         this.recyclerView = recyclerView
+    }
+
+    fun removeItem(imgToDel: ImageData) {
+        val pos = imagesData.indexOf(imgToDel)
+        imagesData.remove(imgToDel)
+        notifyItemRemoved(pos)
     }
 
     fun getImage(pos: Int): ImageView? {
