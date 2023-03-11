@@ -1,6 +1,7 @@
 package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
+import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.photobackup.R
 import com.example.photobackup.models.imageDownload.MediaData
+import com.example.photobackup.other.Constants
 import com.example.photobackup.util.DemoGlideHelper
 
 
@@ -23,9 +25,11 @@ class RecyclerAdapter(
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         internal val image: ImageView
+        internal val imageOverlay: View
 
         init {
             image = view.findViewById(R.id.demo_item_image)
+            imageOverlay = view.findViewById(R.id.demo_item_image_overlay)
             image.setOnClickListener(this)
         }
 
@@ -48,11 +52,14 @@ class RecyclerAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 //        viewHolder.image.setTag(R.tag_item, imagesData[position])
         DemoGlideHelper().loadThumb(mediaData[position], viewHolder.image, token)
+        if (mediaData[position].mediaType == Constants.VIDEO_TYPE)
+            viewHolder.imageOverlay.visibility = View.VISIBLE
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
         DemoGlideHelper().clear(holder.image)
+        holder.imageOverlay.visibility = View.INVISIBLE
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

@@ -16,4 +16,11 @@
         app:aspect="1"
         tools:src="@drawable/painting_01" />
 
+    <View
+            android:id="@+id/demo_item_image_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/video_play_overlay"
+            android:visibility="invisible"/>
+
 </FrameLayout>
