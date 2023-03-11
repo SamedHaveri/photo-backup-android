@@ -61,7 +61,7 @@ class VideosContentJob : JobService() {
                         continue
                     }else{
                         runBlocking { launch {
-                                val uploadedMedia = UploadedMedia(1, uri.path!!)
+                                val uploadedMedia = UploadedMedia(0, uri.path!!)
                                 uploadedMediaRepository.insertUploadedMedia(uploadedMedia);
                             }
                         }
