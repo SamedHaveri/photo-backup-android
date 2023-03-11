@@ -10,6 +10,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:show_buffering="when_playing"
-            app:use_artwork="true"
-            app:default_artwork="@drawable/delete_24px"/>
+            app:use_artwork="true" />
 </com.alexvasilkov.gestures.views.GestureFrameLayout>
