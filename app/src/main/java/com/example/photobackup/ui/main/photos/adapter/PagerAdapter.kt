@@ -16,11 +16,14 @@ import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.util.DemoGlideHelper
 import com.example.photobackup.util.GestureViewSettings
+import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.LoadControl
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultAllocator
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.HttpDataSource
 
@@ -111,6 +114,26 @@ class PagerAdapter(
     }
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+        //todo fix slow bugger -> prob an compresion issue on api
+        //Minimum Video you want to buffer while Playing
+        private val MIN_BUFFER_DURATION = 2000
+        //Max Video you want to buffer during PlayBack
+        private val MAX_BUFFER_DURATION = 2000
+        //Min Video you want to buffer before start Playing it
+        private val MIN_PLAYBACK_START_BUFFER = 1500
+        //Min video You want to buffer when user resumes video
+        private val MIN_PLAYBACK_RESUME_BUFFER = 2000
+        private val loadControl: LoadControl = DefaultLoadControl.Builder()
+            .setAllocator(DefaultAllocator(true, 16))
+            .setBufferDurationsMs(
+                MIN_BUFFER_DURATION,
+                MAX_BUFFER_DURATION,
+                MIN_PLAYBACK_START_BUFFER,
+                MIN_PLAYBACK_RESUME_BUFFER
+            )
+            .setTargetBufferBytes(-1)
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
         private val defaultHttpDataSource = DefaultHttpDataSource.Factory()
         private val dataSourceFactory = DataSource.Factory {
             val dataSource: HttpDataSource = defaultHttpDataSource.createDataSource()
@@ -122,6 +145,7 @@ class PagerAdapter(
             ExoPlayer.Builder(itemView.context)
                 .setMediaSourceFactory(DefaultMediaSourceFactory(context)
                     .setDataSourceFactory(dataSourceFactory))
+                .setLoadControl(loadControl)
                 .apply {
                     setSeekBackIncrementMs(5000)
                     setSeekForwardIncrementMs(5000)

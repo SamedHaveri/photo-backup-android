@@ -11,23 +11,20 @@ import android.content.ComponentName
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.provider.MediaStore.Audio.Media
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.work.Constraints
 import androidx.work.NetworkType
 import com.example.photobackup.data.MediaDatabase
-import com.example.photobackup.data.UploadedMedediaDao
-import com.example.photobackup.data.UploadedMedia
-import com.example.photobackup.data.UploadedMediaRepository
-import com.example.photobackup.di.AppModule
+import com.example.photobackup.data.entity.MediaToUpload
+import com.example.photobackup.data.entity.UploadedMedia
+import com.example.photobackup.data.repository.MediaToUploadRepository
+import com.example.photobackup.data.repository.UploadedMediaRepository
+import com.example.photobackup.other.Constants
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.time.LocalDateTime
-import javax.inject.Inject
+import java.io.File
+import kotlin.streams.toList
 
 
 /**
@@ -37,13 +34,15 @@ import javax.inject.Inject
 class VideosContentJob : JobService() {
     var mRunningParams: JobParameters? = null
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartJob(params: JobParameters): Boolean {
         mRunningParams = params
-        val absolutePaths = ArrayList<String>()
+        val mediasToUpload = ArrayList<MediaToUpload>()
         // Instead of real work, we are going to build a string to show to the user.
         val sb = StringBuilder()
         Log.d("Job", "Job started (video)")
+        val mediaDatabase = MediaDatabase.getDatabase(applicationContext)
+        val uploadedMediaRepository = UploadedMediaRepository(mediaDatabase.uploadedMediaDao())
+        val mediaToUploadRepository = MediaToUploadRepository(mediaDatabase.mediaToUploadDao())
 
         // Did we trigger due to a content change?
         if (params.triggeredContentAuthorities != null) {
@@ -54,18 +53,6 @@ class VideosContentJob : JobService() {
                 // change has happened.
                 val ids = ArrayList<String>()
                 for (uri in params.triggeredContentUris!!) {
-                    //todo find how to not run this on main thread and take away the allowOnMainThread setting in getDatabase
-                    val uploadedMediaRepository = UploadedMediaRepository(MediaDatabase.getDatabase(applicationContext).uploadedMediaDao())
-                    if(uploadedMediaRepository.isUriPathAlreadyAdded(uri.path!!)){
-                        Log.d("FUCK U", "Almost uploaded twice ?")
-                        continue
-                    }else{
-                        runBlocking { launch {
-                                val uploadedMedia = UploadedMedia(0, uri.path!!)
-                                uploadedMediaRepository.insertUploadedMedia(uploadedMedia);
-                            }
-                        }
-                    }
                     val path = uri.pathSegments
                     if (path != null && path.size == EXTERNAL_PATH_SEGMENTS.size + 1) {
                         // This is a specific file.
@@ -75,6 +62,13 @@ class VideosContentJob : JobService() {
                         rescanNeeded = true
                     }
                 }
+
+                val mediaToUploadIds = mediaToUploadRepository.getMediaToUpload(Constants.VIDEO_TYPE)
+                    .stream()
+                    .map { i -> i.uriId.toString() }
+                    .toList()
+                ids.addAll(mediaToUploadIds)
+
                 if (ids.size > 0) {
                     // If we found some ids that changed, we want to determine what they are.
                     // First, we do a query with content provider to ask about all of them.
@@ -97,6 +91,15 @@ class VideosContentJob : JobService() {
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             PROJECTION, selection.toString(), null, null)
                         while (cursor!!.moveToNext()) {
+                            //todo save in db triedBut failed uploads due to network
+                            //todo find how to not run this on main thread and take away the allowOnMainThread setting in getDatabase
+                            val uriId = cursor.getInt(PhotosContentJob.PROJECTION_ID)
+                            //todo check this "video"
+                            val uriPath = "/external/video/media/$uriId"
+
+                            if(isAlreadyUploaded(uriPath, uploadedMediaRepository))
+                                continue
+
                             // We only care about files in the DCIM directory.
                             val dir = cursor.getString(PROJECTION_DATA)
                             Log.d("All changed files", dir)
@@ -105,7 +108,8 @@ class VideosContentJob : JobService() {
                                     haveFiles = true
                                 }
                                 Log.d("filesToUpload", dir)
-                                absolutePaths.add(dir) //store all files for upload
+                                val toUpload = MediaToUpload(0, uriId, uriPath, dir, Constants.VIDEO_TYPE)
+                                mediasToUpload.add(toUpload)
                                 sb.append(cursor.getInt(PROJECTION_ID))
                                 sb.append(": ")
                                 sb.append(dir)
@@ -131,7 +135,7 @@ class VideosContentJob : JobService() {
         }
 
         //todo figure out dependency injection and implement here
-        MediaUploadExecutor().executeUpload(absolutePaths, applicationContext)
+        MediaUploadExecutor().executeUpload(mediasToUpload, applicationContext, mediaDatabase)
 
         return true
     }
@@ -140,6 +144,19 @@ class VideosContentJob : JobService() {
         Log.d("VideoContent", "Job Stopped (video)")
         return false
     }
+
+    private fun isAlreadyUploaded(
+        uriPath: String,
+        uploadedMediaRepository: UploadedMediaRepository,
+    ): Boolean {
+        return if (uploadedMediaRepository.isUriPathAlreadyAdded(uriPath)) {
+            Log.d("FUCK U", "Almost uploaded twice ?")
+            true
+        } else {
+            false
+        }
+    }
+
 
     companion object {
         //in future we will support different folders to observe all in one job i guess ?
