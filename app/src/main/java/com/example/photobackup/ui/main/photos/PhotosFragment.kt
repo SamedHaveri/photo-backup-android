@@ -27,16 +27,19 @@ import com.alexvasilkov.gestures.transition.GestureTransitions
 import com.alexvasilkov.gestures.transition.ViewsTransitionAnimator
 import com.alexvasilkov.gestures.transition.tracker.SimpleTracker
 import com.example.photobackup.R
+import com.example.photobackup.data.MediaDatabase
+import com.example.photobackup.data.entity.MediaBackup
+import com.example.photobackup.data.repository.MediaBackupRepository
 import com.example.photobackup.models.imageDownload.MediaData
+import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Status
 import com.example.photobackup.repository.MainRepository
-import com.example.photobackup.service.PhotosContentJob
-import com.example.photobackup.service.VideosContentJob
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Instant
 import javax.inject.Inject
 
 
@@ -54,7 +57,7 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
     private var gridAdapter: RecyclerAdapter? = null
     private var pagerAdapter: PagerAdapter? = null
     private var pagerListener: OnPageChangeCallback? = null
-    private lateinit var viewModel : PhotosViewModel
+    private lateinit var viewModel: PhotosViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +67,8 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         viewModel = photosViewModel
         val authDetails = photosViewModel.authDetails
 
+
+        //first time configurations
         if (ContextCompat.checkSelfPermission(applicationContext,
                 READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -87,17 +92,32 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
                     STORAGE_PERMISSION_CODE)
             }
         }
-
-        if(!PhotosContentJob.isScheduled(applicationContext)){
-            PhotosContentJob.scheduleJob(applicationContext)
-        }else{
-            Log.d("PhotoContent", "Job already scheduled")
-        }
-
-        if(!VideosContentJob.isScheduled(applicationContext)){
-            VideosContentJob.scheduleJob(applicationContext)
-        }else{
-            Log.d("VideoContent", "Job already scheduled")
+        val repository =
+            MediaBackupRepository(MediaDatabase.getDatabase(applicationContext).mediaBackup())
+        if (repository.isTableEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("Upload Previous Media ?")
+                .setMessage("Do you want to upload images / videos taken previously")
+                .setPositiveButton("Yes") { dialog, which ->
+                    //by creating a record with uploaded and dateAdded as 0 ->
+                    // on sync media that record will be used as reference on from what time do we want to get the media from MediaStore
+                    // dateAdded being 0 gets all
+                    val mediaBackup = MediaBackup( 0, "", "", Constants.IMAGE_TYPE,
+                        0, 0, true, 0)
+                    repository.insert(mediaBackup)
+                    dialog.dismiss()
+                }
+                .setNegativeButton("No") { dialog, which ->
+                    //by creating a record with uploaded and dateAdded as now() ->
+                    // on sync media that record will be used as reference on from what time do we want to get the media from MediaStore
+                    // dateAdded being now gets all from now
+                    val mediaBackup = MediaBackup( 0, "", "", Constants.IMAGE_TYPE,
+                        Instant.now().toEpochMilli() / 1000, 0, true, 0)
+                    repository.insert(mediaBackup)
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
         }
 
 //        setAppBarStateListAnimator(views.appBar)

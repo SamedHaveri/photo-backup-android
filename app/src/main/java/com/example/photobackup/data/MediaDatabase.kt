@@ -1,19 +1,15 @@
 package com.example.photobackup.data
 
 import android.content.Context
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.photobackup.data.dao.MediaToUploadDao
-import com.example.photobackup.data.dao.UploadedMedediaDao
-import com.example.photobackup.data.entity.MediaToUpload
-import com.example.photobackup.data.entity.UploadedMedia
+import com.example.photobackup.data.dao.MediaBackupDao
+import com.example.photobackup.data.entity.MediaBackup
 
-@Database(entities = [UploadedMedia::class, MediaToUpload::class], version = 4, exportSchema = false)
+@Database(entities = [MediaBackup::class], version = 6, exportSchema = false)
 abstract class MediaDatabase : RoomDatabase() {
-    abstract fun uploadedMediaDao(): UploadedMedediaDao
-    abstract fun mediaToUploadDao(): MediaToUploadDao
+    abstract fun mediaBackup(): MediaBackupDao
 
     companion object {
         @Volatile

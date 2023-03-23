@@ -30,19 +30,9 @@
                 android:name=".ui.main.photos.PhotosFragment"
                 android:theme="@style/Theme.PhotoBackup.NoTitle">
         </activity>
-        <service android:name=".service.PhotosContentJob"
+        <service android:name=".service.MediaContentJob"
                 android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
-        <service android:name=".service.VideosContentJob"
-                android:permission="android.permission.BIND_JOB_SERVICE">
-        </service>
-<!--        <service android:name=".service.MediaUploadService"-->
-<!--                android:foregroundServiceType="dataSync">-->
-<!--            <meta-data-->
-<!--                    android:name="com.example.notification_channel_id"-->
-<!--                    android:value="com.example.photobackup.service.MediaUploadService" />-->
-<!--&lt;!&ndash;            todo not like this static shit above&ndash;&gt;-->
-<!--        </service>-->
     </application>
 
 

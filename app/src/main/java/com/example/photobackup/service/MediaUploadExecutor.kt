@@ -5,29 +5,27 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.example.photobackup.R
 import com.example.photobackup.data.MediaDatabase
-import com.example.photobackup.data.entity.MediaToUpload
-import com.example.photobackup.data.entity.UploadedMedia
-import com.example.photobackup.data.repository.MediaToUploadRepository
-import com.example.photobackup.data.repository.UploadedMediaRepository
+import com.example.photobackup.data.entity.MediaBackup
+import com.example.photobackup.data.repository.MediaBackupRepository
 import com.example.photobackup.other.Constants
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Singleton
-import kotlin.math.log
 
 @Singleton
 class MediaUploadExecutor {
 
-    fun executeUpload(mediasToUpload:ArrayList<MediaToUpload>, context : Context, mediaDatabase: MediaDatabase) {
+    fun executeUpload(
+        mediasToUpload: List<MediaBackup>,
+        context: Context,
+        mediaDatabase: MediaDatabase,
+    ) {
 
-        val prefs = context.getSharedPreferences(R.string.prefs.toString(),0)
-        val mediaToUploadRepository = MediaToUploadRepository(mediaDatabase.mediaToUploadDao())
-        val uploadedMediaRepository = UploadedMediaRepository(mediaDatabase.uploadedMediaDao())
+        val prefs = context.getSharedPreferences(R.string.prefs.toString(), 0)
+        val mediaBackupRepository = MediaBackupRepository(mediaDatabase.mediaBackup())
 
         // Create an executor that executes tasks in the main thread.
         val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
@@ -51,35 +49,25 @@ class MediaUploadExecutor {
                                 fileToUpload))
                         .build()
                     val request = Request.Builder()
-                        .url(Constants.BASE_URL+"media/upload")
+                        .url(Constants.BASE_URL + "media/upload")
                         .method("POST", body)
-                        .addHeader("Authorization", prefs.getString(R.string.token_key.toString(), "")!!)
+                        .addHeader("Authorization",
+                            prefs.getString(R.string.token_key.toString(), "")!!)
                         .build()
                     try {
                         val response = client.newCall(request).execute()
                         //todo if token expired use refresh token (when implemented) to get a new token set it and resend file
                         // Restore interrupt status.
-                        Log.d("upload", "code:"+response.code())
-                        if (!response.isSuccessful){
-                            Log.d("upload", "Upload unsuccessful:"+response.code())
-                            runBlocking { launch {
-                                mediaToUploadRepository.insert(mediaToUpload)
-                            } }
-                            mediaToUploadRepository.deleteMediaByUri(mediaToUpload.uriId, mediaToUpload.mediaType)
-                        }
-                        else{
+                        Log.d("upload", "code:" + response.code())
+                        if (!response.isSuccessful) {
+                            Log.d("upload", "Upload unsuccessful:" + response.code())
+                            mediaBackupRepository.setMediaAsTriedButFailed(mediaToUpload.id)
+                        } else {
                             Log.d("upload", "Upload successful")
-                            runBlocking { launch {
-                                val uploadedMedia = UploadedMedia(0, mediaToUpload.uriPath)
-                                uploadedMediaRepository.insertUploadedMedia(uploadedMedia)
-                            } }
-                            mediaToUploadRepository.deleteMediaByUri(mediaToUpload.uriId, mediaToUpload.mediaType)
+                            mediaBackupRepository.setMediaAsUploaded(mediaToUpload.id)
                         }
                     } catch (_: IOException) {
-                        Log.d("UploadMedia", "Connection Issue.. saving for later")
-                        runBlocking {launch {
-                            mediaToUploadRepository.insert(mediaToUpload)
-                        }}
+                        // connection issue / timeout
                     }
                 }
             } catch (e: InterruptedException) {

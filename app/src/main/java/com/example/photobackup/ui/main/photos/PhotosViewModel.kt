@@ -1,16 +1,18 @@
 package com.example.photobackup.ui.main.photos
 
+import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Resource
 import com.example.photobackup.repository.MainRepository
+import com.example.photobackup.service.MediaContentJob
 import com.example.photobackup.util.MyPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -25,8 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PhotosViewModel @Inject constructor(
     private val mainRepository: MainRepository,
-    private val myPreference: MyPreference,
-) : ViewModel() {
+    private val myPreference: MyPreference, application: Application,
+) : AndroidViewModel(application) {
 
     val authDetails by lazy { myPreference.getStoredAuthDetails() }
 
@@ -80,14 +82,14 @@ class PhotosViewModel @Inject constructor(
                 val mediaType = MediaType.parse("text/plain")
                 val body = RequestBody.create(mediaType, "")
                 val request = Request.Builder()
-                    .url(Constants.BASE_URL+"media/id/"+id)
+                    .url(Constants.BASE_URL + "media/id/" + id)
                     .method("DELETE", body)
                     .addHeader("Authorization", myPreference.getStoredToken())
                     .build()
 
                 val response = client.newCall(request).execute()
 
-            } catch ( e : java.lang.Exception){
+            } catch (e: java.lang.Exception) {
                 Log.e("exception", e.stackTrace.contentToString())
             }
         }
@@ -96,6 +98,16 @@ class PhotosViewModel @Inject constructor(
 
     init {
         getImagesData()
+        if (!MediaContentJob.isScheduled(application.applicationContext)) {
+            MediaContentJob.scheduleJob(application.applicationContext)
+        } else {
+            Log.d("PhotoContent", "Job already scheduled")
+        }
+//        if(!VideosContentJob.isScheduled(application.applicationContext)){
+//            VideosContentJob.scheduleJob(application.applicationContext)
+//        }else{
+//            Log.d("VideoContent", "Job already scheduled")
+//        }
     }
 
 }
