@@ -51,7 +51,6 @@ class MediaContentJob : JobService() {
             } else {
                 Log.d("upload", "synced but no files to upload")
             }
-            //todo make this with one Job not two one vid n one image
         } else {
             //no media triggered "wierd"
         }
@@ -160,34 +159,7 @@ class MediaContentJob : JobService() {
             } while (cursorVideo.moveToNext())
             cursorVideo.close()
         }
-
-
-        //todo implement this with one MediaStore query like example:
-//        public static ArrayList<String> getMediaFiles(Context context) {
-//            ArrayList<String> mediaFiles = new ArrayList<>();
-//            String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Video.Media.DATA};
-//            String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-//            + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-//            + " OR "
-//            + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-//            + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
-//            Cursor cursor = context.getContentResolver().query(MediaStore.Files.getContentUri("external"), projection, selection, null, null);
-//            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//            while (cursor.moveToNext()) {
-//                String filePath = cursor.getString(columnIndex);
-//                mediaFiles.add(filePath);
-//            }
-//            cursor.close();
-//            return mediaFiles;
-//        }
-        Log.d("sync", "before inserting syncEntites ")
-        //save all the newly added media entries
-        for (i in listOfMediaBackupToSave) {
-            Log.d("sync", "loopingg ")
-            mediaBackupRepository.insert(i)
-        }
-
-//        mediaBackupRepository.insertAll(listOfMediaBackupToSave)
+        mediaBackupRepository.insertAll(listOfMediaBackupToSave)
     }
 
     companion object {
@@ -213,8 +185,6 @@ class MediaContentJob : JobService() {
             MediaStore.Video.VideoColumns.DATE_ADDED,
 //            MediaStore.Video.VideoColumns.ORIENTATION
         )
-        const val PROJECTION_ID = 0
-        const val PROJECTION_DATA = 1
 
         // This is the external storage directory where cameras place pictures.
         val DCIM_DIR = Environment.getExternalStoragePublicDirectory(

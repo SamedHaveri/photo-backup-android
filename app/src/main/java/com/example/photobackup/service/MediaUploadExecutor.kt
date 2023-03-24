@@ -41,6 +41,10 @@ class MediaUploadExecutor {
                 for (mediaToUpload in mediasToUpload) {
                     Log.d("UploadMedia", "uploading :" + mediaToUpload.absolutePath)
                     val fileToUpload = File(mediaToUpload.absolutePath)
+                    if(!fileToUpload.exists()){
+                        Log.e("upload", "File does not exist:" + fileToUpload.absolutePath)
+                        mediaBackupRepository.setMediaAsTriedButFailed(mediaToUpload.id)
+                    }
                     val client = OkHttpClient().newBuilder()
                         .build()
                     val body = MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -72,9 +76,9 @@ class MediaUploadExecutor {
                 }
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
-                Log.d("UploadMedia", "Thread error interrupt")
+                Log.e("UploadMedia", "Thread error interrupt")
             } catch (_: Exception) {
-                Log.d("UploadMedia", "Exception")
+                Log.e("UploadMedia", "Exception")
             }
 
 

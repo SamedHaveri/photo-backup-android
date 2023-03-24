@@ -26,7 +26,7 @@ interface MediaBackupDao {
     @Query("SELECT * FROM media_backup ORDER BY date_added DESC LIMIT 1")
     fun getLatestSyncedMedia() : MediaBackup
 
-    @Query("SELECT * FROM media_backup WHERE uploaded = 0 AND upload_tries < 3")
+    @Query("SELECT * FROM media_backup WHERE uploaded = 0 AND upload_tries < 3 ORDER BY date_added ASC")
     fun getMediaTuUpload() : List<MediaBackup>
 
     @Query("DELETE FROM media_backup WHERE id = :id")
