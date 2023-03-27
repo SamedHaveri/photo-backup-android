@@ -1,6 +1,7 @@
 package com.example.photobackup.service
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.job.JobInfo
 import android.app.job.JobInfo.TriggerContentUri
 import android.app.job.JobParameters
@@ -8,6 +9,7 @@ import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -16,7 +18,9 @@ import androidx.work.NetworkType
 import com.example.photobackup.data.MediaDatabase
 import com.example.photobackup.data.entity.MediaBackup
 import com.example.photobackup.data.repository.MediaBackupRepository
+import com.example.photobackup.models.parcelable.MediaBackupParcelable
 import com.example.photobackup.other.Constants
+import kotlin.streams.toList
 
 
 /**
@@ -29,6 +33,11 @@ class MediaContentJob : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
         mRunningParams = params
         Log.d("Job", "Job started")
+
+        if(isMyServiceRunning(MediaUploadService::class.java)){
+            Log.d("Job", "Upload not possible, uploadService is running")
+            return true
+        }
 
         // Did we trigger due to a content change?
         if (params.triggeredContentAuthorities != null) {
@@ -44,10 +53,13 @@ class MediaContentJob : JobService() {
                 // throwing FileNotFound on upload
                 // query in MediaStore and get absolutePaths (we have that in localDb but it could have changed) / also verify Dirs
 
-                //make this with dependency injection
-                MediaUploadExecutor().executeUpload(listOfMediaToUpload,
-                    applicationContext,
-                    mediaDatabase)
+                val listOfMediaBackupParcelable = ArrayList(listOfMediaToUpload.stream().map { i -> MediaBackupParcelable(i) }.toList())
+                val uploadIntent = Intent(applicationContext, MediaUploadService::class.java)
+                uploadIntent.putParcelableArrayListExtra("data", listOfMediaBackupParcelable)
+                startForegroundService(uploadIntent)
+
+
+
             } else {
                 Log.d("upload", "synced but no files to upload")
             }
@@ -160,6 +172,16 @@ class MediaContentJob : JobService() {
             cursorVideo.close()
         }
         mediaBackupRepository.insertAll(listOfMediaBackupToSave)
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
     companion object {

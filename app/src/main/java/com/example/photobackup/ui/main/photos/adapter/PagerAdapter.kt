@@ -2,8 +2,10 @@ package com.example.photobackup.ui.main.photos.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.alexvasilkov.gestures.GestureController
 import com.alexvasilkov.gestures.GestureController.OnStateChangeListener
@@ -114,7 +116,6 @@ class PagerAdapter(
     }
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        //todo fix slow bugger -> prob an compresion issue on api
         //Minimum Video you want to buffer while Playing
         private val MIN_BUFFER_DURATION = 2000
         //Max Video you want to buffer during PlayBack
@@ -152,17 +153,9 @@ class PagerAdapter(
                 }.build()
         }
         val gestureView: GestureFrameLayout = itemView.findViewById(R.id.video_view)
-        val video: StyledPlayerView = itemView.findViewById(R.id.full_videoPlayer)
-//        val videoThumbnail: GestureImageView = itemView.findViewById(R.id.video_thumb_image)
+        private val video: StyledPlayerView = itemView.findViewById(R.id.full_videoPlayer)
 
         fun bind(position: Int) {
-
-            // load thumbnail, looks like shit
-//            DemoGlideHelper().loadThumb(mediaData[position], videoThumbnail, token)
-//            videoThumbnail.visibility = View.INVISIBLE
-
-            //do not show frame ? bugfix
-//            gestureView.visibility = View.INVISIBLE
 
             exoPlayerPositionMap[position] = exoPlayer
 
@@ -175,7 +168,6 @@ class PagerAdapter(
 
             exoPlayer.apply {
                 setMediaItem(MediaItem.fromUri(url))
-                prepare()
             }
         }
 
@@ -227,6 +219,7 @@ class PagerAdapter(
         }
     }
 
+    //todo fix below commented code we need to properly recycle pages
 //    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
 //        super.onViewRecycled(holder)
 //        DemoGlideHelper().clear(holder.image)
@@ -247,16 +240,16 @@ class PagerAdapter(
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
         super.onViewDetachedFromWindow(holder)
         exoPlayerPositionMap?.values?.forEach {
-            it.stop()
+            it.pause()
         }
         val player = exoPlayerPositionMap[holder.absoluteAdapterPosition] ?: return
-        player.stop()
+        player.prepare()
     }
 
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
         super.onViewAttachedToWindow(holder)
         exoPlayerPositionMap?.values?.forEach {
-            it.stop()
+            it.prepare()
         }
     }
 

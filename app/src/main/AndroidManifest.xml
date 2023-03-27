@@ -33,6 +33,7 @@
         <service android:name=".service.MediaContentJob"
                 android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
+        <service android:name=".service.MediaUploadService" />
     </application>
 
 

@@ -16,17 +16,5 @@
                 app:show_buffering="when_playing"
                 app:use_artwork="true" />
     </com.alexvasilkov.gestures.views.GestureFrameLayout>
-<!--    <View-->
-<!--            android:id="@+id/view_video_thumbnail"-->
-<!--            android:visibility="invisible"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="@color/black" />-->
-
-<!--    <ImageView-->
-<!--            android:id="@+id/image_video_thumbnail"-->
-<!--            android:visibility="invisible"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent" />-->
 
 </FrameLayout>
