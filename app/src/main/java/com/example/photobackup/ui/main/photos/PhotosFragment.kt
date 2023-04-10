@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.view.MenuItem
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import androidx.work.*
 import com.alexvasilkov.android.commons.texts.SpannableBuilder
 import com.alexvasilkov.gestures.commons.DepthPageTransformer
 import com.alexvasilkov.gestures.transition.GestureTransitions
@@ -36,11 +38,13 @@ import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Status
 import com.example.photobackup.repository.MainRepository
 import com.example.photobackup.service.MediaUploadService
+import com.example.photobackup.service.MediaUploadWorker
 import com.example.photobackup.ui.main.photos.adapter.PagerAdapter
 import com.example.photobackup.ui.main.photos.adapter.RecyclerAdapter
 import com.example.photobackup.util.DecorUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 

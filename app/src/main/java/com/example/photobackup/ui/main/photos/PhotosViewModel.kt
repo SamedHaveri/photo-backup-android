@@ -1,18 +1,24 @@
 package com.example.photobackup.ui.main.photos
 
 import android.app.Application
+import android.app.job.JobInfo
+import android.app.job.JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Resource
 import com.example.photobackup.repository.MainRepository
 import com.example.photobackup.service.MediaContentJob
+import com.example.photobackup.service.MediaContentWorker
+import com.example.photobackup.service.MediaUploadWorker
 import com.example.photobackup.util.MyPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,6 +27,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import java.net.ConnectException
+import java.time.Duration
 import javax.inject.Inject
 
 
@@ -98,16 +105,24 @@ class PhotosViewModel @Inject constructor(
 
     init {
         getImagesData()
-        if (!MediaContentJob.isScheduled(application.applicationContext)) {
-            MediaContentJob.scheduleJob(application.applicationContext)
-        } else {
-            Log.d("PhotoContent", "Job already scheduled")
-        }
-//        if(!VideosContentJob.isScheduled(application.applicationContext)){
-//            VideosContentJob.scheduleJob(application.applicationContext)
-//        }else{
-//            Log.d("VideoContent", "Job already scheduled")
-//        }
+
+
+        val mediaUploadWorker = PeriodicWorkRequestBuilder<MediaUploadWorker>(Duration.ofSeconds(30))
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .addContentUriTrigger(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true)
+                    .addContentUriTrigger(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true)
+                    .build()
+            )
+            .build()
+
+
+        WorkManager.getInstance(application.applicationContext)
+            .enqueueUniquePeriodicWork("media_upload_test", ExistingPeriodicWorkPolicy.KEEP, mediaUploadWorker)
+
+        Log.d("media", "worker enqueued")
+
     }
 
 }

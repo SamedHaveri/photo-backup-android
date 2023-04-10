@@ -14,12 +14,13 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import androidx.work.NetworkType
+import androidx.work.*
 import com.example.photobackup.data.MediaDatabase
 import com.example.photobackup.data.entity.MediaBackup
 import com.example.photobackup.data.repository.MediaBackupRepository
 import com.example.photobackup.models.parcelable.MediaBackupParcelable
 import com.example.photobackup.other.Constants
+import com.google.gson.Gson
 import kotlin.streams.toList
 
 
@@ -53,13 +54,21 @@ class MediaContentJob : JobService() {
                 // throwing FileNotFound on upload
                 // query in MediaStore and get absolutePaths (we have that in localDb but it could have changed) / also verify Dirs
 
-                val listOfMediaBackupParcelable = ArrayList(listOfMediaToUpload.stream().map { i -> MediaBackupParcelable(i) }.toList())
-                val uploadIntent = Intent(applicationContext, MediaUploadService::class.java)
-                uploadIntent.putParcelableArrayListExtra("data", listOfMediaBackupParcelable)
-                startForegroundService(uploadIntent)
+                val mediaToUploadJson = Gson().toJson(listOfMediaToUpload)
+                val data = Data.Builder()
+                    .putString("data", mediaToUploadJson)
+                    .build()
 
-
-
+                val mediaUploadWorker = OneTimeWorkRequestBuilder<MediaUploadWorker>()
+                    .setConstraints(
+                        Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .build()
+                    )
+                    .setInputData(data)
+                    .build()
+                val workManager = WorkManager.getInstance(applicationContext)
+                workManager.enqueueUniqueWork("media_upload", ExistingWorkPolicy.KEEP, mediaUploadWorker)
             } else {
                 Log.d("upload", "synced but no files to upload")
             }
