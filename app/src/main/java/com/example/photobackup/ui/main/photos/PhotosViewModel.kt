@@ -100,13 +100,7 @@ class PhotosViewModel @Inject constructor(
 
     init {
         getImagesData()
-
-        //sync and enqueue upload worker on start
-        viewModelScope.launch {
-            MediaUploadUtil.syncAndUploadIfNeeded(application.applicationContext, WorkManager.getInstance(application.applicationContext))
-        }
-
-        //start jobService that listens to media change and enqueues upload worker
+        //start jobService that listens to media change and uploads media in new thread
         //todo make this in phone startup with broadcastReceiver
         if (!MediaContentJob.isScheduled(application.applicationContext)) {
             MediaContentJob.scheduleJob(application.applicationContext)

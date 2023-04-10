@@ -1,7 +1,8 @@
 package com.example.photobackup.service
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.job.JobInfo
 import android.app.job.JobInfo.TriggerContentUri
 import android.app.job.JobParameters
@@ -9,20 +10,20 @@ import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import androidx.work.*
+import androidx.core.app.NotificationCompat
+import androidx.work.NetworkType
+import androidx.work.WorkManager
+import com.example.photobackup.R
 import com.example.photobackup.data.MediaDatabase
-import com.example.photobackup.data.entity.MediaBackup
 import com.example.photobackup.data.repository.MediaBackupRepository
-import com.example.photobackup.models.parcelable.MediaBackupParcelable
-import com.example.photobackup.other.Constants
 import com.example.photobackup.util.MediaUploadUtil
-import com.google.gson.Gson
-import kotlin.streams.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlin.random.Random
 
 
 /**
@@ -45,7 +46,19 @@ class MediaContentJob : JobService() {
             MediaUploadUtil.syncDatabase(mediaBackupRepository, contentResolver)
             if (mediaBackupRepository.existsMediaToUpload()) {
                 Log.d("ContentJob", "We have media to upload")
-                MediaUploadUtil.enqueueUploadWorker(WorkManager.getInstance(applicationContext))
+                startForegroundService()
+
+                //upload
+                val gfgThread = Thread {
+                    try {
+                        MediaUploadUtil.uploadMedias(applicationContext)
+                        stopForeground(true)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                gfgThread.start()
+
             } else {
                 Log.d("ContentJob", "synced but no files to upload")
             }
@@ -59,6 +72,26 @@ class MediaContentJob : JobService() {
     override fun onStopJob(params: JobParameters): Boolean {
         Log.d("ContentJob", "Job Stopped (photos)")
         return false
+    }
+
+    private fun startForegroundService() {
+        val channel = NotificationChannel(
+            "media_upload",
+            "Media Upload",
+            NotificationManager.IMPORTANCE_HIGH,
+        )
+        val notificationManager =
+            applicationContext.getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
+        startForeground(
+            Random.nextInt(),
+            NotificationCompat.Builder(applicationContext, "media_upload")
+                .setSmallIcon(R.drawable.delete_24px)
+                .setContentTitle("Media Upload")
+                .setContentText("Uploading...")
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .build())
     }
 
     companion object {
