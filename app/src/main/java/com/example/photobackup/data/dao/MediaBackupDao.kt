@@ -24,15 +24,18 @@ interface MediaBackupDao {
     fun getByMediaTypeAndUriId(mediaType: String, uriId: Int) : MediaBackup
 
     @Query("SELECT * FROM media_backup ORDER BY date_added DESC LIMIT 1")
-    fun getLatestSyncedMedia() : MediaBackup
+    fun getLatestSyncedMedia() : MediaBackup?
 
     @Query("SELECT * FROM media_backup WHERE uploaded = 0 AND upload_tries < 3 ORDER BY date_added ASC")
-    fun getMediaTuUpload() : List<MediaBackup>
+    fun getMediaTuUpload() : List<MediaBackup>?
+
+    @Query("SELECT CASE WHEN COUNT(id) > 0 THEN true ELSE false END FROM media_backup WHERE uploaded = 0 AND upload_tries < 3")
+    fun existsMediaToUpload() : Boolean
 
     @Query("DELETE FROM media_backup WHERE id = :id")
     fun delete(id: Long)
 
-    @Query("SELECT CASE WHEN COUNT(m.id) = 0 THEN true ELSE false END FROM media_backup m")
+    @Query("SELECT CASE WHEN COUNT(id) = 0 THEN true ELSE false END FROM media_backup")
     fun isTableEmpty() : Boolean
 
     @Query("DELETE FROM media_backup WHERE uri_id = :uriId AND media_type = :mediaType")

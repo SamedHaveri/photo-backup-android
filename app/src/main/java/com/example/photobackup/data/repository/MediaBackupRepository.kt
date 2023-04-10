@@ -13,6 +13,8 @@ class MediaBackupRepository(private val mediaBackupDao: MediaBackupDao) {
 
     fun getMediaToUpload() = mediaBackupDao.getMediaTuUpload()
 
+    fun existsMediaToUpload() = mediaBackupDao.existsMediaToUpload()
+
     fun isTableEmpty() = mediaBackupDao.isTableEmpty()
 
     fun deleteMediaByUri(uriId: Int, mediaType: String) =

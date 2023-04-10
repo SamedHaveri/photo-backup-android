@@ -4,7 +4,6 @@ import com.example.photobackup.api.ApiHelper
 import com.example.photobackup.api.ApiHelperImpl
 import com.example.photobackup.api.ApiService
 import com.example.photobackup.other.Constants
-import com.example.photobackup.service.MediaUploadExecutor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,10 +43,5 @@ object AppModule {
     @Provides
     @Singleton
     fun provideApiHelper(apiHelper: ApiHelperImpl): ApiHelper = apiHelper
-
-    //todo figure out dependency injection :/
-    @Provides
-    @Singleton
-    fun provideMediaUploadExecutor(mediaUploadExecutor: MediaUploadExecutor): MediaUploadExecutor = mediaUploadExecutor
 
 }
