@@ -24,7 +24,7 @@ import kotlin.random.Random
 
 
 /**
- * Example stub job to monitor when there is a change to photos in the media provider.
+ * Job to monitor when there is a change to photos in the media provider.
  */
 @SuppressLint("SpecifyJobSchedulerIdRange")
 class MediaContentJob : JobService() {

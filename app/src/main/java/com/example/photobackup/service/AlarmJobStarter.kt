@@ -15,13 +15,8 @@ class AlarmJobStarter : BroadcastReceiver() {
         val pm = context!!.getSystemService(Context.POWER_SERVICE) as PowerManager
         val wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "photobackup:alarmhere")
         wl.acquire()
-
-        if (!MediaContentJob.isScheduled(context)) {
-            Log.d("Alarm", "Job not started .. starting ")
+        if (!MediaContentJob.isScheduled(context))
             MediaContentJob.scheduleJob(context)
-        } else {
-            Log.d("Alarm", "Job already running ")
-        }
         wl.release()
     }
 
