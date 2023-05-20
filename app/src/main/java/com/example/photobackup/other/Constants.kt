@@ -9,4 +9,5 @@ object Constants {
 
     const val VIDEO_TYPE = "video"
     const val IMAGE_TYPE = "image"
+    const val mediaContentJobId = 546863151
 }

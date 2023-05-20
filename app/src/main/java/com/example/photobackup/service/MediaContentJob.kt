@@ -10,7 +10,6 @@ import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
-import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -19,6 +18,7 @@ import androidx.work.NetworkType
 import com.example.photobackup.R
 import com.example.photobackup.data.MediaDatabase
 import com.example.photobackup.data.repository.MediaBackupRepository
+import com.example.photobackup.other.Constants
 import com.example.photobackup.util.MediaUploadUtil
 import kotlin.random.Random
 
@@ -86,13 +86,7 @@ class MediaContentJob : JobService() {
 
     companion object {
         //in future we will support different folders to observe all in one job i guess ?
-        const val jobId = 546863151; //todo make this better than just placing it here ?
-
-        // The root URI of the media provider, to monitor for generic changes to its content.
-        val MEDIA_URI = Uri.parse("content://" + MediaStore.AUTHORITY + "/")
-
-        // Path segments for image-specific URIs in the provider.
-        val EXTERNAL_PATH_SEGMENTS = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.pathSegments
+        private const val jobId = Constants.mediaContentJobId
 
         // The columns we want to retrieve about a particular image.
         val PROJECTION = arrayOf(
@@ -152,7 +146,7 @@ class MediaContentJob : JobService() {
         // Check whether this job is currently scheduled.
         fun isScheduled(context: Context): Boolean {
             val js = context.getSystemService(JobScheduler::class.java)
-            val jobs = js.allPendingJobs ?: return false
+            val jobs = js.allPendingJobs
             for (i in jobs.indices) {
                 if (jobs[i].id == jobId) {
                     Log.d("JobChecker", "Job is already scheduled ")
