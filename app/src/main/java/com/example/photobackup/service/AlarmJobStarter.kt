@@ -10,13 +10,13 @@ import android.os.PowerManager
 import android.util.Log
 
 
-class AlarmJobStarter : BroadcastReceiver(){
+class AlarmJobStarter : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val pm = context!!.getSystemService(Context.POWER_SERVICE) as PowerManager
         val wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "photobackup:alarmhere")
         wl.acquire()
 
-        if(!MediaContentJob.isScheduled(context)){
+        if (!MediaContentJob.isScheduled(context)) {
             Log.d("Alarm", "Job not started .. starting ")
             MediaContentJob.scheduleJob(context)
         } else {
@@ -25,7 +25,7 @@ class AlarmJobStarter : BroadcastReceiver(){
         wl.release()
     }
 
-    companion object{
+    companion object {
         fun setAlarm(context: Context) {
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, AlarmJobStarter::class.java)
@@ -38,7 +38,8 @@ class AlarmJobStarter : BroadcastReceiver(){
 
         fun cancelAlarm(context: Context) {
             val intent = Intent(context, AlarmJobStarter::class.java)
-            val sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            val sender =
+                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.cancel(sender)
             sender.cancel()

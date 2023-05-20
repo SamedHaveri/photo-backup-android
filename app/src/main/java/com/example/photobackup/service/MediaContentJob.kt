@@ -32,35 +32,28 @@ class MediaContentJob : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         mRunningParams = params
+        val mediaDatabase = MediaDatabase.getDatabase(applicationContext)
+        val mediaBackupRepository = MediaBackupRepository(mediaDatabase.mediaBackup())
         Log.d("ContentJob", "ContentJob started")
+        MediaUploadUtil.syncDatabase(mediaBackupRepository, contentResolver)
 
-        // Did we trigger due to a content change?
-        if (params.triggeredContentAuthorities != null) {
-            Log.d("ContentJob", "Auth triggered")
-            val mediaDatabase = MediaDatabase.getDatabase(applicationContext)
-            val mediaBackupRepository = MediaBackupRepository(mediaDatabase.mediaBackup())
+        // Did we trigger due to a content change? or do we have media to upload in db
+        if (params.triggeredContentAuthorities != null || mediaBackupRepository.existsMediaToUpload()) {
+            Log.d("ContentJob", "We have media to upload")
+            startForegroundService()
 
-            MediaUploadUtil.syncDatabase(mediaBackupRepository, contentResolver)
-            if (mediaBackupRepository.existsMediaToUpload()) {
-                Log.d("ContentJob", "We have media to upload")
-                startForegroundService()
-
-                //upload
-                val gfgThread = Thread {
-                    try {
-                        MediaUploadUtil.uploadMedias(applicationContext)
-                        stopForeground(STOP_FOREGROUND_REMOVE)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+            //upload
+            val gfgThread = Thread {
+                try {
+                    MediaUploadUtil.uploadMedias(applicationContext)
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                gfgThread.start()
-
-            } else {
-                Log.d("ContentJob", "synced but no files to upload")
             }
+            gfgThread.start()
         } else {
-            //no media triggered "wierd"
+            Log.d("ContentJob", "synced but no files to upload")
         }
 
         return true
