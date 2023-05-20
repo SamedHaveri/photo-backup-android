@@ -16,13 +16,10 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.NetworkType
-import androidx.work.WorkManager
 import com.example.photobackup.R
 import com.example.photobackup.data.MediaDatabase
 import com.example.photobackup.data.repository.MediaBackupRepository
 import com.example.photobackup.util.MediaUploadUtil
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
 
@@ -52,7 +49,7 @@ class MediaContentJob : JobService() {
                 val gfgThread = Thread {
                     try {
                         MediaUploadUtil.uploadMedias(applicationContext)
-                        stopForeground(true)
+                        stopForeground(STOP_FOREGROUND_REMOVE)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -165,9 +162,11 @@ class MediaContentJob : JobService() {
             val jobs = js.allPendingJobs ?: return false
             for (i in jobs.indices) {
                 if (jobs[i].id == jobId) {
+                    Log.d("JobChecker", "Job is already scheduled ")
                     return true
                 }
             }
+            Log.d("JobChecker", "Job is NOT already scheduled ")
             return false
         }
 

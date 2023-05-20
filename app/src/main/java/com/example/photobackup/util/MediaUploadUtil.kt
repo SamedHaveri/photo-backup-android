@@ -3,18 +3,15 @@ package com.example.photobackup.util
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.MediaStore
-import android.provider.MediaStore.Video.Media
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
-import androidx.work.*
 import com.example.photobackup.R
 import com.example.photobackup.data.MediaDatabase
 import com.example.photobackup.data.entity.MediaBackup
 import com.example.photobackup.data.repository.MediaBackupRepository
 import com.example.photobackup.other.Constants
 import com.example.photobackup.service.MediaContentJob
-import com.example.photobackup.service.MediaUploadWorker
 import okhttp3.*
 import okio.BufferedSink
 import okio.Okio
@@ -126,25 +123,25 @@ class MediaUploadUtil {
             }
             mediaBackupRepository.insertAll(listOfMediaBackupToSave)
         }
-        fun enqueueUploadWorker(workManager: WorkManager) {
-            val mediaUploadWorker = OneTimeWorkRequestBuilder<MediaUploadWorker>()
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-                )
-                .build()
-            workManager
-                .enqueueUniqueWork("media_upload", ExistingWorkPolicy.KEEP, mediaUploadWorker)
-        }
-        suspend fun syncAndUploadIfNeeded(applicationContext: Context, workManager: WorkManager) {
-            val mediaDatabase = MediaDatabase.getDatabase(applicationContext)
-            val mediaBackupRepository = MediaBackupRepository(mediaDatabase.mediaBackup())
-            syncDatabase(mediaBackupRepository, applicationContext.contentResolver)
-            if(mediaBackupRepository.existsMediaToUpload()){
-                enqueueUploadWorker(workManager)
-            }
-        }
+//        fun enqueueUploadWorker(workManager: WorkManager) {
+//            val mediaUploadWorker = OneTimeWorkRequestBuilder<MediaUploadWorker>()
+//                .setConstraints(
+//                    Constraints.Builder()
+//                        .setRequiredNetworkType(NetworkType.CONNECTED)
+//                        .build()
+//                )
+//                .build()
+//            workManager
+//                .enqueueUniqueWork("media_upload", ExistingWorkPolicy.KEEP, mediaUploadWorker)
+//        }
+//        suspend fun syncAndUploadIfNeeded(applicationContext: Context, workManager: WorkManager) {
+//            val mediaDatabase = MediaDatabase.getDatabase(applicationContext)
+//            val mediaBackupRepository = MediaBackupRepository(mediaDatabase.mediaBackup())
+//            syncDatabase(mediaBackupRepository, applicationContext.contentResolver)
+//            if(mediaBackupRepository.existsMediaToUpload()){
+//                enqueueUploadWorker(workManager)
+//            }
+//        }
 
         fun uploadMedias(context:Context){
             val prefs = context.getSharedPreferences(R.string.prefs.toString(), 0)
@@ -156,7 +153,7 @@ class MediaUploadUtil {
             for (mediaToUpload in mediasToUpload) {
 
                 try {
-                    Log.d("uploadWorker", "uploading :" + mediaToUpload.absolutePath)
+                    Log.d("uploadScript", "uploading :" + mediaToUpload.absolutePath)
                     val fileToUpload = File(mediaToUpload.absolutePath)
                     val fileUri = fileToUpload.toUri()
 
@@ -172,7 +169,7 @@ class MediaUploadUtil {
                         ?: throw FileNotFoundException()
 
                     if (!fileToUpload.exists()) {
-                        Log.e("uploadWorker", "File does not exist:" + fileToUpload.absolutePath)
+                        Log.e("uploadScript", "File does not exist:" + fileToUpload.absolutePath)
                         mediaBackupRepository.setMediaAsTriedButFailed(mediaToUpload.id)
                     }
                     val client = OkHttpClient().newBuilder()
@@ -208,20 +205,20 @@ class MediaUploadUtil {
                         .build()
                     val re = client.newCall(request).execute()
                     if (re.isSuccessful) {
-                        Log.d("uploadWorker", "Upload successful")
+                        Log.d("uploadScript", "Upload successful")
                         mediaBackupRepository.setMediaAsUploaded(mediaToUpload.id)
                         fd.close()
                     } else {
-                        Log.d("uploadWorker", "Upload unsuccessful")
+                        Log.d("uploadScript", "Upload unsuccessful")
                         mediaBackupRepository.setMediaAsTriedButFailed(mediaToUpload.id)
                         fd.close()
                     }
                 } catch (e: FileNotFoundException) {
                     //todo handle file not found
-                    Log.e("uploadWorker", "Exception" + e.stackTraceToString())
+                    Log.e("uploadScript", "Exception" + e.stackTraceToString())
                     mediaBackupRepository.setMediaAsTriedButFailed(mediaToUpload.id)
                 } catch (e: Exception) {
-                    Log.e("uploadWorker", "Exception" + e.stackTraceToString())
+                    Log.e("uploadScript", "Exception" + e.stackTraceToString())
                 }
             }
         }

@@ -8,13 +8,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
 import com.example.photobackup.models.imageDownload.MediaData
 import com.example.photobackup.other.Constants
 import com.example.photobackup.other.Resource
 import com.example.photobackup.repository.MainRepository
+import com.example.photobackup.service.AlarmJobStarter
 import com.example.photobackup.service.MediaContentJob
-import com.example.photobackup.util.MediaUploadUtil
 import com.example.photobackup.util.MyPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -102,10 +101,12 @@ class PhotosViewModel @Inject constructor(
         getImagesData()
         //start jobService that listens to media change and uploads media in new thread
         //todo make this in phone startup with broadcastReceiver
+        if(!AlarmJobStarter.isAlarmRunning(application.applicationContext)){
+            AlarmJobStarter.setAlarm(application.applicationContext)
+        }
+
         if (!MediaContentJob.isScheduled(application.applicationContext)) {
             MediaContentJob.scheduleJob(application.applicationContext)
-        } else {
-            Log.d("PhotoContent", "Job already scheduled")
         }
 
     }
