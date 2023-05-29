@@ -121,27 +121,29 @@ class PhotosFragment : AppCompatActivity(), RecyclerAdapter.OnPhotoListener {
         }
 
 //        setAppBarStateListAnimator(views.appBar)
+
         initDecorMargins()
 
-        var bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNavigationView.selectedItemId = R.id.navigation_home
-        @Suppress("DEPRECATION")
-        bottomNavigationView.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_dashboard -> {
+        //todo uncomment this if you want bottom navigation -> also uncomment layout file
+//        var bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+//        bottomNavigationView.selectedItemId = R.id.navigation_home
+//        @Suppress("DEPRECATION")
+//        bottomNavigationView.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.navigation_dashboard -> {
 //                    startActivity(Intent(applicationContext, DashBoard::class.java))
-                    overridePendingTransition(0, 0)
-                    return@OnNavigationItemSelectedListener true
-                }
-                R.id.home -> return@OnNavigationItemSelectedListener true
-                R.id.navigation_notifications -> {
+//                    overridePendingTransition(0, 0)
+//                    return@OnNavigationItemSelectedListener true
+//                }
+//                R.id.home -> return@OnNavigationItemSelectedListener true
+//                R.id.navigation_notifications -> {
 //                    startActivity(Intent(applicationContext, About::class.java))
-                    overridePendingTransition(0, 0)
-                    return@OnNavigationItemSelectedListener true
-                }
-            }
-            false
-        })
+//                    overridePendingTransition(0, 0)
+//                    return@OnNavigationItemSelectedListener true
+//                }
+//            }
+//            false
+//        })
 
         val imagesData = photosViewModel.mediaData.observe(this, Observer {
             when (it.status) {

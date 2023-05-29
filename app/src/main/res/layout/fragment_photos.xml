@@ -36,13 +36,14 @@
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
+        <!--todo            on bottom nav enable add marginBottom 60dp-->
+        <!--                android:layout_marginBottom="60dp"-->
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/demo_grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:padding="@dimen/demo_list_margin"
-                android:layout_marginBottom="60dp"
                 android:scrollbarStyle="outsideOverlay"
                 android:scrollbars="vertical"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -50,16 +51,16 @@
                 tools:listitem="@layout/demo_item_photo"
                 tools:spanCount="3" />
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/bottom_navigation"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_alignParentBottom="true"
-                android:layout_gravity="bottom"
-                app:itemBackground="@color/accent"
-                app:itemIconTint="@drawable/selector"
-                app:itemTextColor="@drawable/selector"
-                app:menu="@menu/bottom_nav_menu" />
+<!--        <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--                android:id="@+id/bottom_navigation"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="60dp"-->
+<!--                android:layout_alignParentBottom="true"-->
+<!--                android:layout_gravity="bottom"-->
+<!--                app:itemBackground="@color/accent"-->
+<!--                app:itemIconTint="@drawable/selector"-->
+<!--                app:itemTextColor="@drawable/selector"-->
+<!--                app:menu="@menu/bottom_nav_menu" />-->
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -91,11 +92,6 @@
             android:shadowRadius="4"
             android:textColor="@android:color/white"
             android:textSize="16sp"
-            android:visibility="invisible" />
-
-    <androidx.appcompat.widget.Toolbar
-            android:id="@+id/demo_full_image_toolbar"
-            style="@style/App.Toolbar.Transparent"
             android:visibility="invisible" />
 
 </RelativeLayout>
